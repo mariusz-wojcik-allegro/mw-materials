@@ -97,3 +97,55 @@ słownika tokenów. Jest to specjalna numeryczna reprezentacja słownika. Posiad
 | "obrazy"         | 522 | [0.88, -0.11, 0.29, -0.73] |
 
 
+##### Tablica Positional Embeddings
+
+Przed rozpoczęciem treningu konieczne jest stworzenie globalnej ** tablicy positional embeddings ** . Jest globalnym 
+zbiorem wektorów dla wszystkich możliwych pozycji jakie model może napotkać. Tablica ta ma tyle wierszy ile tokenów 
+może mieć największa sekwencja przetwarzana przez ten model (a więc np. 512, 1024, 2048, ... , itd...). Dla każdej 
+pozycji przechowywany jest wektor embedding , o długości zgodnej z długością embeddingów określonych w parametrach 
+modelu(np. 768, 1024). Wektory input i positional mają te same wymiary,co pozawla na ich wzajemne sumowanie. 
+
+Przy założeniu że nasz model może przetwarzać sekwencje o maksymalnej długości 8 tokenów i określono dla 
+niego _wymiar_embeddingu = 4_ , to inicjalna tablica embeddingów pozycyjnych mogłaby wyglądać następująco:
+
+| Pozycja | Wektor Embeddingu Pozycyjnego (PE) - Wymiar 4   |
+|---------|-----------------------------------------------|
+| 0       | [0.01, 0.02, 0.03, 0.04]                      |
+| 1       | [0.05, 0.06, 0.07, 0.08]                      |
+| 2       | [0.09, 0.10, 0.11, 0.12]                      |
+| 3       | [0.13, 0.14, 0.15, 0.16]                      |
+| 4       | [0.17, 0.18, 0.19, 0.20]                      |
+| 5       | [0.21, 0.22, 0.23, 0.24]                      |
+| 6       | [0.25, 0.26, 0.27, 0.28]                      |
+| 7       | [0.29, 0.30, 0.31, 0.32]                      |
+| ...     | ... (aż do max\_seq\_length - 1)               |
+
+Zatem posługując się identyfikatorem pozycji tokenu jak łącznikiem możemy skojarzyć ze sobą element z tablicy 
+**Input Embeddings** z elementem z tablicy **Positional Embeddings** . 
+
+| Pozycja | Token            | Wektor Kodowania Pozycyjnego (PE) - Wymiar 4   |
+|---------|------------------|-----------------------------------------------|
+| 0       | "Natura"         | [0.01, 0.02, 0.03, 0.04]                      |
+| 1       | "stwarza"        | [0.05, 0.06, 0.07, 0.08]                      |
+| 2       | "najpiękniejsze" | [0.09, 0.10, 0.11, 0.12]                      |
+| 3       | "obrazy"         | [0.13, 0.14, 0.15, 0.16]                      |
+
+Dla każdego elementu mamy do dyspozycji dwa wektory embeddings, po jednym z każdej tabeli. 
+
+Teraz dla każdego tokenu dokonujemy sumowania embeddingów i w ten sposób powstanie Finalny Input Embedding, który ma 
+zakodowaną informację zarówno o znaczeniu semantycznym tokenu, jak i jego pozycji w sekwencji. Finalny Input 
+Embedding jest to struktura która będzie wykorzystywana w dalszym procesie uczenia. 
+
+| Pozycja | Token            | ID  | Input Embedding (4 liczby)      | Wektor Kodowania Pozycyjnego (PE) - Wymiar 4 | Finalny Input Embedding (Sumowany)   |
+|---------|------------------|-----|----------------------------------|----------------------------------------------|--------------------------------------|
+| 0       | "Natura"         | 201 | [0.12, -0.87, 0.45, 0.33]       | [0.01, 0.02, 0.03, 0.04]                     | [0.13, -0.85, 0.48, 0.37]            |
+| 1       | "stwarza"        | 315 | [-0.56, 0.91, -0.22, 0.77]      | [0.05, 0.06, 0.07, 0.08]                     | [-0.51, 0.97, -0.15, 0.85]           |
+| 2       | "najpiękniejsze" | 489 | [0.03, 0.65, -0.44, -0.19]      | [0.09, 0.10, 0.11, 0.12]                     | [0.12, 0.75, -0.33, -0.07]           |
+| 3       | "obrazy"         | 522 | [0.88, -0.11, 0.29, -0.73]      | [0.13, 0.14, 0.15, 0.16]                     | [1.01, 0.03, 0.44, -0.57]            |
+
+Wektor wynikowy jest unikalny dla konkretnego słowa na konkretnej pozycji. Dalsze warstwy transformera, a zwłaszcza 
+mechanizm uwagi są sieciami neuronowymi, które podczas treningu uczą się jak interpretować te wzbogacone wektory. 
+
+Dla lepszego zrozumienia można posłużyć się analogią do smaku potrawy: 
+
+Składa się z wielu składników, które są ze sobą wymieszane. Nie "rozdzielasz" ich w ustach, ale twój mózg uczy się rozpoznawać poszczególne smaki i ich kombinacje. Podobnie Transformer uczy się, że pewne kombinacje wartości w wektorze (które wynikają z sumy V_słowo i PE) sygnalizują, że "to jest rzeczownik na początku zdania", a inne kombinacje, że "to jest czasownik w środku zdania".
