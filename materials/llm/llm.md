@@ -53,11 +53,13 @@ działa Transformer (sieć neuronowa)](https://miroslawmamczur.pl/czym-jest-i-ja
 
 Diagram architektury transformera wygląda następująco:
 
-![transformer.jpg](img/transformer.jpg)
+![transformer.jpg](./img/transformer.jpg)
 
 ##### Słownik tokenów i macierz Input Embeddings
 
-Pierwszą warstwą architektury Transformera jest macierz Input Embedding. Jej powstanie musi zostać zostać poprzedzone 
+Zanim rozpocznie się faktyczny proces uczenia, konieczne jest przygotowanie dwóch powiązanych ze sobą struktur 
+pomocniczych - **Słownika tokenów** oraz macierzy **Input 
+Embedding**. Jej powstanie musi zostać zostać poprzedzone 
 stworzeniem jeszcze bardziej pierwotnej struktury - słownika tokenów. 
 
 **Słownik tokenów** - jest to struktura której zadaniem jest przetworzenie tekstu na format zrozumiały dla przetwarzania numerycznego.  
@@ -65,13 +67,13 @@ stworzeniem jeszcze bardziej pierwotnej struktury - słownika tokenów.
 W procesie tokenizacji każde zdanie ze zbioru uczącego przetwarzane jest na jednostki:
 
 Jako przykład niech posłuży zdanie: "Natura stwarza najpiękniejsze obrazy"
+    
+  * "Natura"
+  * "stwarza"
+  * "najpiękniejsze"
+  * "obrazy"
 
-    * "Natura"
-    * "stwarza"
-    * "najpiękniejsze"
-    * "obrazy"
-
-  Następnie każdy token otrzymuje unikalny identyfikator liczbowy. Identyfikatory są stałe podczas całego procesu uczenia.
+Następnie każdy token otrzymuje unikalny identyfikator liczbowy. Identyfikatory są stałe podczas całego procesu uczenia.
 
   * "Natura" (ID: 201)
   * "stwarza" (ID: 315)
@@ -81,7 +83,7 @@ Jako przykład niech posłuży zdanie: "Natura stwarza najpiękniejsze obrazy"
 W tym kroku model uczy się swojego słownika tokenów. Oznacza to, że zostają zidentyfikowane wszystkie unikalne słowa 
 i pod-słowa, które będzie rozpoznawał.
 
-Pierwszą warstwą architektury transformera jest **macierz Input Embedings** powstająca bezpośrednio po kroku tworzenia 
+Pierwszą warstwą architektury transformera jest **macierz Input Embeddings** powstająca bezpośrednio po kroku tworzenia 
 słownika tokenów. Jest to specjalna numeryczna reprezentacja słownika. Posiada tyle wierszy, 
    ile jest  
    elementów w słowniku. Do każdego tokena przypisany jest wektor liczb stałoprzecinkowych. Inicjalnie posiada on 
@@ -146,6 +148,43 @@ Embedding jest to struktura która będzie wykorzystywana w dalszym procesie ucz
 Wektor wynikowy jest unikalny dla konkretnego słowa na konkretnej pozycji. Dalsze warstwy transformera, a zwłaszcza 
 mechanizm uwagi są sieciami neuronowymi, które podczas treningu uczą się jak interpretować te wzbogacone wektory. 
 
+Finalny wektor **Input Embedding** jest skonstruowany w taki sposób, aby słowa o podobnym znaczeniu miały podobne 
+wektory (czyli znalazły się blisko siebie w przestrzeni wielowymiarowej). Wymiar tej przestrzeni jest ograniczony 
+wymiarem wektora **Input Embedding**. Jeśli ma on długość 768 to znaczy że każde słowo, lub token reprezentowane 
+jest jako punkt w 768 wymiarowej przestrzeni wektorowej.
+ 
 Dla lepszego zrozumienia można posłużyć się analogią do smaku potrawy: 
 
 Składa się z wielu składników, które są ze sobą wymieszane. Nie "rozdzielasz" ich w ustach, ale twój mózg uczy się rozpoznawać poszczególne smaki i ich kombinacje. Podobnie Transformer uczy się, że pewne kombinacje wartości w wektorze (które wynikają z sumy V_słowo i PE) sygnalizują, że "to jest rzeczownik na początku zdania", a inne kombinacje, że "to jest czasownik w środku zdania".
+
+##### Sposób działania Encodera
+
+Jest to ta część architektury Transformera która odpowiada za uczenie modelu. Składa się on z kilku 
+dwuelementowych bloków (warstw). Zwykle jest ich kilka - od 6 do 12.
+Każda taka warstwa przetwarza dane i przekazuje je do następnej, stopniowo budując coraz bardziej złożone i abstrakcyjne rozumienie wejściowej sekwencji.
+
+![transformer-encoder.jpg](img/transformer-encoder.jpg)
+
+
+###### Jak działa pojedyncza Warstwa Enkodera?
+Pojedyncza warstwa encodera składa się z dwóch wyspecjalizowanych podbloków
+
+* Multi-Head Self-Attention (Wielogłowicowa Self-Attention)
+* Feed-Forward Network (Sieć Przewijająca do Przodu)
+
+**Multi-Head Self-Attention**
+
+Głowica uwagi ( **Attention Head** ) to kluczowy komponent architektury **Transformer**. Jest to filtr, lub 
+perspektywa, która jest wykorzystywania do analizowania relacji pomiędzy tokenami w sekwencji. Wiele ( **Attention 
+Head** ) składa się na mechanizm (**Multi Head**)). Dzięki temu, że każda z głowic , w procesie uczenia  
+specjalizuje się w jakimś specjalnym aspekcie powiązań pomiędzy tokenami.  
+
+Z każdą głowicą związane są trzy unikalne dla niej macierze Wag, które podlegają procesowi uczenia. Są to macierze 
+(Wq, Wk, Wv). Na początku uczenia są one inicjalizowane losowymi wartościami, które będą podlegać modyfikacjom (na 
+tym polega ta specjalizacja). 
+
+
+
+
+
+
