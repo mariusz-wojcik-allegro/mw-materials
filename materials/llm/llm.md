@@ -44,17 +44,27 @@ Zadanie jakiegokolwiek pytania do takiego modelu skutkowałoby wygenerowaniem wi
 | Wyjście (Losowe Przewidywania) |
 +--------------------------+
 ```
-####
+#### Architektura LLM - Transformer
 
-#### Kroki przygotowawcze - przygotowanie słownika tokenów i tablicy embeddings
+W kontekście LLM, Transformer jest architekturą, która pozwala modelowi przetwarzać i rozumieć sekwencje danych (takich jak tekst) w sposób wysoce równoległy i efektywny, uchwytując złożone zależności kontekstowe. Zasadniczo, jest to "silnik", który pobiera numeryczne reprezentacje słów i przekształca je w reprezentacje, z których można generować nowy tekst lub odpowiadać na pytania.
 
-Przed uruchomieniem iteracyjnego procesu uczenia przygotowywane są dwie struktury biorące udział w dalszym
-przetwarzaniu. Tworzone są one raz.
+Został on opisany w dokumencie [Attention Is All You Need](https://arxiv.org/pdf/1706.03762) , oraz [Czym jest i jak
+działa Transformer (sieć neuronowa)](https://miroslawmamczur.pl/czym-jest-i-jak-dziala-transformer-siec-neuronowa/
 
-Przykład zdania: "Natura stwarza najpiękniejsze obrazy"
+Diagram architektury transformera wygląda następująco:
 
-1. **Słownik tokenów** - jest to struktura której zadaniem jest przetworzenie tekstu na format zrozumiały dla
-  przetwarzania numerycznego. W procesie tokenizacji każde zdanie ze zbioru uczącego przetwarzane jest na jednostki:
+![transformer.jpg](img/transformer.jpg)
+
+##### Słownik tokenów i macierz Input Embeddings
+
+Pierwszą warstwą architektury Transformera jest macierz Input Embedding. Jej powstanie musi zostać zostać poprzedzone 
+stworzeniem jeszcze bardziej pierwotnej struktury - słownika tokenów. 
+
+**Słownik tokenów** - jest to struktura której zadaniem jest przetworzenie tekstu na format zrozumiały dla przetwarzania numerycznego.  
+
+W procesie tokenizacji każde zdanie ze zbioru uczącego przetwarzane jest na jednostki:
+
+Jako przykład niech posłuży zdanie: "Natura stwarza najpiękniejsze obrazy"
 
     * "Natura"
     * "stwarza"
@@ -71,7 +81,8 @@ Przykład zdania: "Natura stwarza najpiękniejsze obrazy"
 W tym kroku model uczy się swojego słownika tokenów. Oznacza to, że zostają zidentyfikowane wszystkie unikalne słowa 
 i pod-słowa, które będzie rozpoznawał.
 
-2. **Macierz embeddings- Input Embedings** - jest to specjalna numeryczna reprezentacja słownika. Posiada tyle wierszy, 
+Pierwszą warstwą architektury transformera jest **macierz Input Embedings** powstająca bezpośrednio po kroku tworzenia 
+słownika tokenów. Jest to specjalna numeryczna reprezentacja słownika. Posiada tyle wierszy, 
    ile jest  
    elementów w słowniku. Do każdego tokena przypisany jest wektor liczb stałoprzecinkowych. Inicjalnie posiada on 
    losowe wartości, które będą aktywnie optymalizowane podczas całego procesu uczenia. Są one parametrami 
@@ -86,15 +97,3 @@ i pod-słowa, które będzie rozpoznawał.
 | "obrazy"         | 522 | [0.88, -0.11, 0.29, -0.73] |
 
 
-#### Architektura LLM - Transformer 
-
-W kontekście LLM, Transformer jest architekturą, która pozwala modelowi przetwarzać i rozumieć sekwencje danych (takich jak tekst) w sposób wysoce równoległy i efektywny, uchwytując złożone zależności kontekstowe. Zasadniczo, jest to "silnik", który pobiera numeryczne reprezentacje słów i przekształca je w reprezentacje, z których można generować nowy tekst lub odpowiadać na pytania.
-
-Został on opisany w dokumencie [Attention Is All You Need](https://arxiv.org/pdf/1706.03762) , oraz [Czym jest i jak 
-działa Transformer (sieć neuronowa)](https://miroslawmamczur.pl/czym-jest-i-jak-dziala-transformer-siec-neuronowa/
-
-Diagram architektury transformera wygląda następująco:
-
-![transformer-architecture.png](img/transformer-architecture.png)
-
-Macierz Input Embedings jest pierwszą warstwą wejściową dla Transformera, który stanowi podstawę architektury LLM.
