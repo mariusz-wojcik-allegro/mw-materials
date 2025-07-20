@@ -58,7 +58,7 @@ Diagram architektury transformera wygląda następująco:
 ##### Słownik tokenów i macierz Input Embeddings
 
 Zanim rozpocznie się faktyczny proces uczenia, konieczne jest przygotowanie dwóch powiązanych ze sobą struktur 
-pomocniczych - **Słownika tokenów** oraz macierzy **Input 
+pomocniczych - **Słownika tokenów** oraz wektora **Input 
 Embedding**. Jej powstanie musi zostać zostać poprzedzone 
 stworzeniem jeszcze bardziej pierwotnej struktury - słownika tokenów. 
 
@@ -220,7 +220,14 @@ Trafia do kolejnego komponentu w obrębie Encodera - **Feed-Forward-Network**.
 Jest to komponent uzupełniający w stosunku do **Multi-Head Self-Attention**. Podczas gdy mechanizm uwagi skupia się na 
 relacjach pomiędzy tokenami, **FFN** skupia się na reprezentacji pojedynczego tokena. Architektonicznie jest to 
 dwuwarstwowa sieć neuronowa z zastosowaną nieliniową funkcją aktywacji pomiędzy warstwami. Celem przetwarzania 
-przez ten  komponent jest zamodelowanie i odkrycie subtelnych i złożonych wzorców na poziomie jednego tokena. 
+przez ten  komponent jest odkrycie subtelnych i złożonych cech z reprezentacji pochodzących z mechanizmu uwagi. 
+
+Wynik działania **FFN** poddawany jest operacjom **Add & Norm** i kierowany do kolejnej z warstw **Encodera**. 
+
+Przetwarzanie w kolejnych warstwach odbywa się w sposób analogiczny do opisanego wyżej. Należy jednak zwrócić uwagę na 
+jeden bardzo istotny fakt. Wejściem dla pierwszej warstwy jest wektor  **Input Embedding** . To on jest podstawą 
+wykonywanych w tej warstwie obliczeń. W przypadku kolejnych encoderów wejściem do warstwy jest wektor wyjściowy z 
+warstwy poprzedniej. Dzięki temu następuje coraz większe doprecyzowanie kontekstu. 
 
 
 
