@@ -181,7 +181,39 @@ specjalizuje się w jakimś specjalnym aspekcie powiązań pomiędzy tokenami.
 
 Z każdą głowicą związane są trzy unikalne dla niej macierze Wag, które podlegają procesowi uczenia. Są to macierze 
 (Wq, Wk, Wv). Na początku uczenia są one inicjalizowane losowymi wartościami, które będą podlegać modyfikacjom (na 
-tym polega ta specjalizacja). 
+tym polega ta specjalizacja). Macierze wag są unikalne dla każdej głowicy, ale są one takie same dla wszystkich 
+tokenów przetwarzanych przez tę głowicę. 
+
+Proces przetwarzania dla każdej głowicy odbywa się według stałej sekwencji:
+
+1. Każda głowica otrzymuje wektory **Final Input Embeddings** dla wszystkich tokenów składających się na
+   przetwarzaną sekwencję.
+2. Głowica, dla każdego tokena w sekwencji wykonuje mnożenie własnych macierzy wag **(Wq,Wk,Wv)** z każdym z wektorem  
+**Final Input Encodings** dla każdego z tokenów, w ten sposób powstają trzy wektory pomocnicze Q(Query), K(Key),
+   Value(V) dla każdego tokena w sekwencji
+3. **Mechanizm uwagi** 
+   * Macierz **Q** aktualnie przetwarzanego tokenu jest porównywany z wektorek **K** każdego 
+      tokenu w sekwencji. Daje to odpowiedź na pytanie jak istotny jest każdy inny token w sekwencji dla zrozumienia 
+      sensu aktualnie przetwarzanego tokena. Jeśli K innego tokena pasuje do Q bieżącego tokenta to znaczy że on jest 
+      "ważny". W tym kroku obliczane są **współczynniki uwagi**.
+   * Na podstawie tych porównań oraz współczynników uwagi generowana jest ważona suma **V** wszystkich tokenów 
+     wchodzących w skład sekwencji. Powstają więc wektory **V1,V2,V3,...,Vn**. Jest to wynik pracy głowicy. Jest to nowa, bardziej 
+     kontekstualizowana reprezentacja dla przetwarzanego tokena.
+4. Wyniki ze wszystkich głowic dla danego tokena są konkatenowane, tworzony jest jeden bardzo długi wektor, który 
+   zawiera wartości liczbowe zawierające syntezę wszysktich różnych perspektyw z poszczególnych głowic.
+5. Następnie ten długi wektor przepuszczany jest przez finalną, nauczalną macierz wag **W0 (Output Projection)**. 
+   Macierz **W0 (Output Projection)** jest trenowana aby jak najlepiej łączyć projekcje. Macierz a jest parametrem 
+   modelu używanym w komponencie **Multi-Head Attention** do finalnego ukształtowania jego wyjścia (nie jest 
+   natomiast samym wyjściem)
+6. Obliczane jest wyjście z komponentu **Multi-Head Attention**. Jest to wynik mnożenia macierzy **V** przez macierz 
+   **W0**. 
+   
+Macierz wyjściowa z komponentu **Multi-Head Attention** poddawana jest dalszemu przetwarzaniu przez komponent ("Add 
+& Norm") i normalizacji.
+
+Trafia do kolejnego komponentu w obrębie Encodera - **Feed-Forward-Network**.
+
+**Feed-Forward-Network**
 
 
 
