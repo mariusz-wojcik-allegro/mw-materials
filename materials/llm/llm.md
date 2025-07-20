@@ -134,9 +134,9 @@ Zatem posługując się identyfikatorem pozycji tokenu jak łącznikiem możemy 
 
 Dla każdego elementu mamy do dyspozycji dwa wektory embeddings, po jednym z każdej tabeli. 
 
-Teraz dla każdego tokenu dokonujemy sumowania embeddingów i w ten sposób powstanie Finalny Input Embedding, który ma 
-zakodowaną informację zarówno o znaczeniu semantycznym tokenu, jak i jego pozycji w sekwencji. Finalny Input 
-Embedding jest to struktura która będzie wykorzystywana w dalszym procesie uczenia. 
+Teraz dla każdego tokenu dokonujemy sumowania embeddingów i w ten sposób powstanie **Final Input Embedding**, który ma 
+zakodowaną informację zarówno o znaczeniu semantycznym tokenu, jak i jego pozycji w sekwencji. **Final Input 
+Embedding** jest to struktura która będzie wykorzystywana w dalszym procesie uczenia. 
 
 | Pozycja | Token            | ID  | Input Embedding (4 liczby)      | Wektor Kodowania Pozycyjnego (PE) - Wymiar 4 | Finalny Input Embedding (Sumowany)   |
 |---------|------------------|-----|----------------------------------|----------------------------------------------|--------------------------------------|
@@ -180,33 +180,60 @@ Head** ) składa się na mechanizm (**Multi Head**)). Dzięki temu, że każda z
 specjalizuje się w jakimś specjalnym aspekcie powiązań pomiędzy tokenami.  
 
 Z każdą głowicą związane są trzy unikalne dla niej macierze Wag, które podlegają procesowi uczenia. Są to macierze 
-(Wq, Wk, Wv). Na początku uczenia są one inicjalizowane losowymi wartościami, które będą podlegać modyfikacjom (na 
+**(Wq, Wk, Wv)**. Na początku uczenia są one inicjalizowane losowymi wartościami, które będą podlegać modyfikacjom (na 
 tym polega ta specjalizacja). Macierze wag są unikalne dla każdej głowicy, ale są one takie same dla wszystkich 
 tokenów przetwarzanych przez tę głowicę. 
 
 Proces przetwarzania dla każdej głowicy odbywa się według stałej sekwencji:
 
-1. Każda głowica otrzymuje wektory **Final Input Embeddings** dla wszystkich tokenów składających się na
+1. Każda głowica otrzymuje wektory **Final Input Embedding** dla wszystkich tokenów składających się na
    przetwarzaną sekwencję.
 2. Głowica, dla każdego tokena w sekwencji wykonuje mnożenie własnych macierzy wag **(Wq,Wk,Wv)** z każdym z wektorem  
-**Final Input Encodings** dla każdego z tokenów, w ten sposób powstają trzy wektory pomocnicze Q(Query), K(Key),
-   Value(V) dla każdego tokena w sekwencji
-3. **Mechanizm uwagi** 
-   * Macierz **Q** aktualnie przetwarzanego tokenu jest porównywany z wektorek **K** każdego 
-      tokenu w sekwencji. Daje to odpowiedź na pytanie jak istotny jest każdy inny token w sekwencji dla zrozumienia 
-      sensu aktualnie przetwarzanego tokena. Jeśli K innego tokena pasuje do Q bieżącego tokenta to znaczy że on jest 
-      "ważny". W tym kroku obliczane są **współczynniki uwagi**.
-   * Na podstawie tych porównań oraz współczynników uwagi generowana jest ważona suma **V** wszystkich tokenów 
-     wchodzących w skład sekwencji. Powstają więc wektory **V1,V2,V3,...,Vn**. Jest to wynik pracy głowicy. Jest to nowa, bardziej 
+**Final Input Embedding** dla każdego z tokenów, w ten sposób powstają trzy wektory pomocnicze Q(Query), K(Key),
+   Value(V) dla każdego tokena w sekwencji. W standardowej konfiguracji długość wektorów Q,K,V oblicza się dzieląc 
+   długość wektora **Final Input Embedding**  przez liczbę głowic. dk=dv=dmodel/h (liczba głowic), 
+
+Przykład:
+      
+    dk=dv=dmodel 768(długość wektora FIE)/8(liczba głowic) = 96.   
+
+4. **Mechanizm uwagi** 
+   * Macierz **Q** aktualnie przetwarzanego tokenu jest porównywana z wektorem **K** każdego 
+      tokenu w sekwencji. Realizowane jest to przez wykonanie iloczynu skalarnego pomiędzy tymi wektorami. Wynik tej 
+     operacji prowadzi do wyznaczenia współczynników uwagi i określa stopień dopasowania pomiędzy tokenami. Daje to 
+     odpowiedź na pytanie jak istotny jest każdy inny token w sekwencji dla zrozumienia 
+      sensu aktualnie przetwarzanego tokena. Jeśli **K** innego tokena pasuje do **Q** bieżącego tokenta to znaczy 
+     że on jest "ważny". 
+   * Na podstawie wyznaczonych współczynników uwagi, oraz wektora wartości **V** generowana jest ważona suma **V** 
+     wszystkich tokenów  wchodzących w skład sekwencji. Powstają więc wektory **V1,V2,V3,...,Vn**. Jest to wynik pracy głowicy. Jest to nowa, bardziej 
      kontekstualizowana reprezentacja dla przetwarzanego tokena.
+
+     
+Przykład dla tokena "Natura":
+    
+        Wyjście z Głowicy 1 dla "Natura": [v_1_1, v_1_2, ..., v_1_96] (wymiar 96)
+   
+        Wyjście z Głowicy 2 dla "Natura": [v_2_1, v_2_2, ..., v_2_96] (wymiar 96)
+        ...
+        
+        Wyjście z Głowicy h dla "Natura": [v_h_1, v_h_2, ..., v_h_96] (wymiar 96)
+   
 4. Wyniki ze wszystkich głowic dla danego tokena są konkatenowane, tworzony jest jeden bardzo długi wektor, który 
    zawiera wartości liczbowe zawierające syntezę wszysktich różnych perspektyw z poszczególnych głowic.
+
+Kontynuacja przykładu dla tokena "Natura":
+
+        Skonkatenowany wektor dla "Natura" = [v_1_1, ..., v_1_96, v_2_1, ..., v_2_96, ..., v_h_1, ..., v_h_96]
+        
+        Łączny wymiar po konkatenacji wynosi h * dv = dmodel (768)
+
 5. Następnie ten długi wektor przepuszczany jest przez finalną, nauczalną macierz wag **W0 (Output Projection)**. 
    Macierz **W0 (Output Projection)** jest trenowana aby jak najlepiej łączyć projekcje. Macierz a jest parametrem 
    modelu używanym w komponencie **Multi-Head Attention** do finalnego ukształtowania jego wyjścia (nie jest 
    natomiast samym wyjściem)
 6. Obliczane jest wyjście z komponentu **Multi-Head Attention**. Jest to wynik mnożenia macierzy **V** przez macierz 
-   **W0**. 
+   **W0**. Wynikiem mnożenia jest finalny wektor wyjściowy z Multi-Head Attention dla danego tokena ma długość 
+   dmodel, czyli zgodną z długością wejściowego wektora **Final Input Embedding*.
    
 Macierz wyjściowa z komponentu **Multi-Head Attention** poddawana jest dalszemu przetwarzaniu przez komponent ("Add 
 & Norm") na które składają się operacje:
