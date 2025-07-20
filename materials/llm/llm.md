@@ -209,12 +209,18 @@ Proces przetwarzania dla każdej głowicy odbywa się według stałej sekwencji:
    **W0**. 
    
 Macierz wyjściowa z komponentu **Multi-Head Attention** poddawana jest dalszemu przetwarzaniu przez komponent ("Add 
-& Norm") i normalizacji.
+& Norm") na które składają się operacje:
+
+1. Połączenia Resztkowego (Add): Sumuje wejście i wyjście komponentu **Multi-Head Attention** 
+2. Normalizację Warstwową (Norm): Wykonuje normalizację wyniku.
 
 Trafia do kolejnego komponentu w obrębie Encodera - **Feed-Forward-Network**.
 
 **Feed-Forward-Network**
-
+Jest to komponent uzupełniający w stosunku do **Multi-Head Self-Attention**. Podczas gdy mechanizm uwagi skupia się na 
+relacjach pomiędzy tokenami, **FFN** skupia się na reprezentacji pojedynczego tokena. Architektonicznie jest to 
+dwuwarstwowa sieć neuronowa z zastosowaną nieliniową funkcją aktywacji pomiędzy warstwami. Celem przetwarzania 
+przez ten  komponent jest zamodelowanie i odkrycie subtelnych i złożonych wzorców na poziomie jednego tokena. 
 
 
 
