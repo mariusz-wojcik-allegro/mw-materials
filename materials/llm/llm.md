@@ -121,7 +121,7 @@ Zadanie jakiegokolwiek pytania do takiego modelu skutkowałoby wygenerowaniem wi
 
 Zanim rozpocznie się faktyczny proces uczenia, konieczne jest przygotowanie dwóch powiązanych ze sobą struktur
 pomocniczych - **Słownika tokenów** oraz wektora **Input
-Embedding**. Jej powstanie musi zostać zostać poprzedzone
+Embedding**. Jej powstanie musi zostać poprzedzone
 stworzeniem jeszcze bardziej pierwotnej struktury - słownika tokenów.
 
 **Słownik tokenów** - jest to struktura której zadaniem jest przetworzenie tekstu na format zrozumiały dla przetwarzania
@@ -198,7 +198,7 @@ Dla każdego elementu mamy do dyspozycji dwa wektory embeddings, po jednym z ka�
 
 Teraz dla każdego tokenu dokonujemy sumowania embeddingów i w ten sposób powstanie **Final Input Embedding**, który ma
 zakodowaną informację zarówno o znaczeniu semantycznym tokenu, jak i jego pozycji w sekwencji. **Final Input
-Embedding** jest to struktura która będzie wykorzystywana w dalszym procesie uczenia.
+Embedding** jest to struktura, która będzie wykorzystywana w dalszym procesie uczenia.
 
 | Pozycja | Token            | ID  | Input Embedding (4 liczby) | Wektor Kodowania Pozycyjnego (PE) - Wymiar 4 | Finalny Input Embedding (Sumowany) |
 |---------|------------------|-----|----------------------------|----------------------------------------------|------------------------------------|
@@ -241,8 +241,8 @@ Pojedyncza warstwa encodera składa się z dwóch wyspecjalizowanych podbloków
 **Multi-Head Self-Attention**
 
 Głowica uwagi ( **Attention Head** ) to kluczowy komponent architektury **Transformer**. Jest to filtr, lub
-perspektywa, która jest wykorzystywania do analizowania relacji pomiędzy tokenami w sekwencji. Wiele ( **Attention
-Head** ) składa się na mechanizm (**Multi Head**)). Dzięki temu, że każda z głowic , w procesie uczenia  
+perspektywa, która jest wykorzystywana do analizowania relacji pomiędzy tokenami w sekwencji. Wiele ( **Attention
+Head** ) składa się na mechanizm (**Multi Head**). Dzięki temu, że każda z głowic , w procesie uczenia  
 specjalizuje się w jakimś specjalnym aspekcie powiązań pomiędzy tokenami.
 
 Z każdą głowicą związane są trzy unikalne dla niej macierze Wag, które podlegają procesowi uczenia. Są to macierze
