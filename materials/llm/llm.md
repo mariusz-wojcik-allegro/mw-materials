@@ -224,7 +224,7 @@ rozpoznawać poszczególne smaki i ich kombinacje. Podobnie Transformer uczy si�
 wektorze (które wynikają z sumy V_słowo i PE) sygnalizują, że "to jest rzeczownik na początku zdania", a inne
 kombinacje, że "to jest czasownik w środku zdania".
 
-#### Sposób działania Encodera
+#### Sposób działania Encodera ( w modelu Encoder-Only)
 
 Jest to ta część architektury Transformera która odpowiada za uczenie modelu. Składa się on z kilku
 dwuelementowych bloków (warstw). Zwykle jest ich kilka - od 6 do 12.
@@ -324,7 +324,13 @@ jeden bardzo istotny fakt. Wejściem dla pierwszej warstwy jest wektor  **Input 
 wykonywanych w tej warstwie obliczeń. W przypadku kolejnych encoderów wejściem do warstwy jest wektor wyjściowy z
 warstwy poprzedniej. Dzięki temu następuje coraz większe doprecyzowanie kontekstu. 
 
+Po przetworzeniu przez wszystkie warstwy, dla każdego tokena w oryginalnej sekwencji otrzymujemy finalną 
+reprezentację w postaci wektora. Jest to więc macierz o wymiarach (_długość_sekwencjixdmodel_), kazdy wiersz to wektor 
+o długości _dmodel(np. 768)_ odpowiadający jednemu tokenowi. 
+
+Ta finalna reprezentacja będzie podstawą do kolejnego etapu treningu - wykonywania zadań pretreningowych.
 
 
+#### Sposób działania Decodera ( w modelu Decoder-Only)
 
-
+![decoder.jpg](img/decoder.jpg)
