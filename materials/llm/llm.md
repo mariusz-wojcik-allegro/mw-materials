@@ -10,14 +10,12 @@ tekst lub odpowiadać na pytania.
 Został on opisany w dokumencie [Attention Is All You Need](https://arxiv.org/pdf/1706.03762) , oraz [Czym jest i jak
 działa Transformer (sieć neuronowa)](https://miroslawmamczur.pl/czym-jest-i-jak-dziala-transformer-siec-neuronowa/
 
-Diagram architektury transformera wygląda następująco:
-
-![transformer.jpg](./img/transformer.jpg)
-
 Wyróżnić można trz główne topologie architektury Transformera. Wybór właściwej topologii zależy od rodzaju zadań,
 które ma wykonywać model. Różnią się one tym które bloki **(Encoder/Decoder)** są w nich używane.
 
 1. **Encoder Only**
+
+![encoder.jpg](img/encoder.jpg)
 
 Ten typ architektury składa się wyłącznie ze stosu komponentów **Encoder** . Występuje w nim wiele warstw Encoderów
 nabudowanych jedna na drugiej.
@@ -39,6 +37,8 @@ Najbardziej znany model z tego typu architekturą to **BERT (BIdeirectional Enco
 
 2. **Decoder Only**
 
+![decoder.jpg](img/decoder.jpg)
+
 W tym typie architektury występuje wyłącznie stos komponentów **Decoder** , które ułożone są w nabudowane na siebie warstwy.
 
 Model tego typu może czerpać kontekst tyko z tokenów które go poprzedzają w sekwencji. Nie może odnosić się do tokenów, które występują po nim.
@@ -59,6 +59,8 @@ Ten rodzaj architektury wykorzystywany jest w modelach:
 * Gemma
 
 3. **Encoder-Decoder**
+
+![transformer.jpg](img/transformer.jpg)
 
 Jest to pełna forma Transformera opisana w przywoływanym przeze mnie artykule [Attention Is All You Need]
 (https://arxiv.org/pdf/1706.03762) . Łączy ona w sobie cechy obydwu opisanych wcześniej topologii. Wykorzystuje 
@@ -229,7 +231,7 @@ dwuelementowych bloków (warstw). Zwykle jest ich kilka - od 6 do 12.
 Każda taka warstwa przetwarza dane i przekazuje je do następnej, stopniowo budując coraz bardziej złożone i abstrakcyjne
 rozumienie wejściowej sekwencji.
 
-![transformer-encoder.jpg](img/transformer-encoder.jpg)
+![encoder.jpg](img/encoder.jpg)
 
 ##### Jak działa pojedyncza Warstwa Enkodera?
 
