@@ -161,17 +161,38 @@ Są to np:
 
 Należy zwrócić uwagę że w procesie uczenia, zbiór uczący podlega maskowaniu. W praktyce oznacza to, że w trakcie 
 treningu losowo wybierany jest pewien procent tokenów (np. 15% ), a następnie te wybrane tokeny jest zamieniana na 
-specjalny token _[MASK]_ lub zamieniana na losowy token ze słownika. Te zmienione tokeny wędrują przez całą siatkę 
-Enkoderów. 
+specjalny token _[MASK]_ lub zamieniana na losowy token ze słownika (ale o tym za chwilę). Te zmienione tokeny wędrują 
+przez całą siatkę Enkoderów, więc również dla nich budowana jest ich reprezentacja kontekstowa. Fakt ten jest 
+źródłem pewnej przypadłości (szczególnie wczesnych modeli) nazywanej _mask token toxicity_. Polega ona 
+na tym, że model, który w danych uczących stosunkowo często napotyka token _[MASK]_ może uznać go jako "szczególnie 
+ważny" i zacząć go nadmiernie używać w swoich odpowiedziach, szczególnie gdyby nie był ich zbyt pewny.
+Aby zminimalizować to ryzyko stosuje się zaawansowane techniki maskowania np:
 
-Działanie takie nadaje modelom w architekturze Encoder-Only unikalne zdolności rozumienia języka. W trakcie uczenia 
-model dostrzega że token _[MASK]_ ma specjalny charakter, że mogą zostać za niego podstawiane inne tokeny. 
+Po wylosowaniu 15% tokenów dzieli się je na trzy podgrupy:
 
-Na przykład, w zdaniu "Natura [MASK] najpiękniejsze obrazy", aby poprawnie wstawić "stwarza", model musi zrozumieć, że "Natura" jest podmiotem, a "najpiękniejsze obrazy" są dopełnieniem, i że kontekst wskazuje na czynność kreacji.
+1. 80% z nich jest faktycznie zastępowana tokenem _[MASK]_. To jest główne zsadanie, które zmusza model do uczenia 
+   się kontekstu. Model uczy się że jest to token specjalny (jego embedding nie reprezentuje żadnego znaczenia w 
+   języku) , którego wartość należy wywnioskować na podstawie 
+   analizy jego bezpośredniego otoczenia.
+2. 10% tokenów z tej grupy jest zastępowana losowym tokenem ze słownika. To uczy model, że nawet jeśli napotka 
+   zwyczajnie wyglądające słowo nadal może być zmuszony do jego przewidywania na podstawie kontekstu.
+3. 10% tokenów pozostaje niezmienionych. To uczy model, że czasami "prawdziwa odpowiedź" to słowo, które już widzi.
 
-Gdyby Enkoder uczył się na danych niezamaskowanych, jego zdolność byłaby bardzo zredukowana. Nauczyłby się 
-odtwarzać następstwa słów bez konieczności zrozumienia zależności pomiędzy nimi.  
+Ta strategia wprowadza element szumu i niepewności, ucząć że token _[MASK]_ nie jest jedynym "sygnałem braku", a 
+także że musi polegać na kontekście, nawet jeśli napotka prawdziwe słowo.
 
+Żeby lepiej wyobrazić sobie konsekwencje tej strategii rozpatrzmy dwa zdania:
+
+``` Natura opona najpiękniejsze obrazy.```
+``` Opona jest ważną częścią koła samochodowego. ```
+
+W pierwszym przypadku słowo _opona_ jest przykładem tokenu maskującego, który został losowo wybrany ze słownika. 
+Model będzie próbował budować reprezentację kontekstową wszystkich tokenów, uwzględniając słowo _opona_ jako 
+zwyczajny element otoczenia.  Model zakoduje informację o tym że słowo _opona_ znajduje się w otoczeniu _Natura_, 
+_najpiękniejsze_ i _obrazy_ . Wewnętrznie model będzie czuł, że słowo to wprowadza niespójność i że jest ono mało 
+prawdopodobne w porównaniu do innych sekwencji, z którymi się spotkał np: _Opona jest ważną częścią koła samochodowego._
+Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem będą słabsze, przez co model uczy się, że 
+taka kobinacja liczb jest nietypowa.
 
 #### Słownik tokenów i macierz Input Embeddings
 
