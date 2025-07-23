@@ -1,0 +1,28 @@
+Wprowadź poniższe zmiany redakcyjne i stylistyczne w dokumencie popularnonaukowym dotyczącym architektury Transformer w
+LLM:
+1. Zmień styl nagłówków na składnię Markdown (`###`, `####`) dla przejrzystości i ułatwienia eksportu.
+2. Zastąp frazę „embeddingi pozycyjne” terminem `Positional Embeddings` dla zachowania spójności z dokumentacją
+techniczną.
+3. Uporządkuj i ujednolić wypunktowania (z myślników na `-`).
+Zmiany wprowadź w całym dokumencie
+
+
+
+2. Wyróżnij wszystkie nazwy architektur i komponentów modelu (`Transformer`, `Encoder`, `Decoder`, `BERT`, `GPT`, `Multi-Head Attention` itd.) za pomocą składni `inline code` (otoczonych backtickami).
+
+4. Dodaj linki do źródeł naukowych i edukacyjnych w odpowiednich miejscach:
+   - Link do pracy „Attention Is All You Need”
+   - Link do bloga wyjaśniającego działanie Transformera
+5. Popraw sformułowania potoczne lub kolokwialne:
+   - Usuń: „Spróbujmy spojrzeć z oddalenia”
+   - Przepisz: „To swoisty silnik...” → „To swoisty `silnik`, który przekształca...”
+
+7. W sekcji `Decoder-Only`, doprecyzuj opis predykcji tokenu jako:
+   - „Model uczy się przewidywać kolejny token na podstawie poprzednich.”
+8. Rozbij dłuższe akapity opisujące `Multi-Head Attention` na punktowane etapy działania:
+   - `Q`, `K`, `V` → iloczyny skalarne → softmax → ważone `V` → `concatenation` → `W0`
+9. Dodaj podsumowanie roli `Dynamicznego maskowania (MLM)`:
+   - Nie jest celem, lecz środkiem do nauki ogólnych reprezentacji.
+10. Dodaj przykład tokenizacji i embeddingów w formie tabeli Markdown.
+11. Przepisz niektóre podtytuły i opisy techniczne na bardziej precyzyjne i jednoznaczne (np. „Propagacja wsteczna i aktualizacja wag” zamiast ogólników).
+12. Dodaj przypomnienie o możliwości dalszego opisu `Decodera` i `fine-tuningu` na końcu dokumentu.

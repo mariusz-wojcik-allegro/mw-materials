@@ -1,6 +1,6 @@
 # LLM - uczenie - AI Engineering
 
-## Architektura LLM - Transformer
+### Architektura LLM - Transformer
 
 W kontekście LLM, Transformer jest architekturą, która pozwala modelowi przetwarzać i rozumieć sekwencje danych (takich
 jak tekst) w sposób wysoce równoległy i efektywny, uchwytując złożone zależności kontekstowe. Zasadniczo, jest to "
@@ -24,12 +24,12 @@ Przy uczeniu każdy token może widzieć i czerpać kontekst ze wszystkich innyc
 Modele tego rodzaju osiągają najlepsze wyniki w realizacji zadania rozumienia języka naturalnego **(NLU- Natural
 Language Understanding)**
 
-* Klasyfikacja tekstu (np. analiza sentymentu, wykrywanie spamu)
-* Odpowiadanie na pytania do tekstu (najlepiej z wyborem)
-* Rozpoznawanie nazwanych encji (NER) czyli np. wyszukiwanie nazw własnych, kolorów itp.
-* Rozumienie relacji logicznych w tekście
-* Ekstrakcja informacji
-* Wyszukiwanie informacji
+- Klasyfikacja tekstu (np. analiza sentymentu, wykrywanie spamu)
+- Odpowiadanie na pytania do tekstu (najlepiej z wyborem)
+- Rozpoznawanie nazwanych encji (NER) czyli np. wyszukiwanie nazw własnych, kolorów itp.
+- Rozumienie relacji logicznych w tekście
+- Ekstrakcja informacji
+- Wyszukiwanie informacji
 
 Modele tego typu nie są najlepsze w generowaniu dłuższych tekstów.
 
@@ -50,16 +50,16 @@ Uczy się przewidywać następny token na podstawie sekwencji poprzednich.
 Modele tego typu są wykorzystywane głównie w zadaniach generowania języka naturalnego **(NLG - Natural Language
 Generation)**
 
-* Generowanie tekstu (eseje, artykuły, wiersze, kod)
-* Tworzenie chatbotów
-* Streszczenie
+- Generowanie tekstu (eseje, artykuły, wiersze, kod)
+- Tworzenie chatbotów
+- Streszczenie
 
 Ten rodzaj architektury wykorzystywany jest w modelach:
 
-* GPT (GPT-1, GPT-2, GPT-3, GPT-4)
-* LLaMA
-* Mistral
-* Gemma
+- GPT (GPT-1, GPT-2, GPT-3, GPT-4)
+- LLaMA
+- Mistral
+- Gemma
 
 3. **Encoder-Decoder**
 
@@ -71,18 +71,18 @@ zarówno warstwy komponentów **Encoder** jak i **Decoder**.
 
 Architektura tego typu najlepiej nadaje się do zadań przekształcania sekwencji:
 
-* Tłumaczenia tekstu (z jednego języka na inny)
-* Streszczenia
-* Parafrazy
-* Konwersja danych do innego formatu
+- Tłumaczenia tekstu (z jednego języka na inny)
+- Streszczenia
+- Parafrazy
+- Konwersja danych do innego formatu
 
-## Fazy przetwarzania modelu
+### Fazy przetwarzania modelu
 
-### Wstępny trening modelu LLM ( Pre-Training) w architekturze Encoder-Only
+#### Wstępny trening modelu LLM (Pre-Training) w architekturze Encoder-Only
 
 #### Przebieg procesu trenowania modelu LLM
 
-Przed wytrenowaniem model LLM to pusta sieć neuronowa. Jej parametry ( wagi połączeń pomiędzy neuronami ) są
+Przed wytrenowaniem model LLM to pusta sieć neuronowa. Jej parametry (wagi połączeń pomiędzy neuronami) są
 zainicjowane losowymi wartościami.
 
 Nie posiada wiedzy o języku, strukturze, gramatyce, nie zna żadnych słów.
@@ -93,24 +93,24 @@ oddalenia. Można wyróżnić następujące jego etapy:
 
 1. Przygotowanie danych
 
-* Zbieranie i czyszczenie - Gromadzi się biliony tokenów surowego tekstu z Internetu (książki, artykuły, Wikipedia,
+- Zbieranie i czyszczenie - Gromadzi się biliony tokenów surowego tekstu z Internetu (książki, artykuły, Wikipedia,
   itp..)
-* Tokenizacja i słownik - Na podstawie całego korpusu budowany jest słownik tokenów. Każdy token dostaje ssoje ID.
-  Tekst jest przekształcany w siekwencje ID tokenów.
-* Formatowanie do Treningu - Dane są dzielone na mniejsze części/sekwencje o ustalonej maksymalnej długości (np. 512,
-  768,1024,itp..). Jeśli zdania są dłuższe podlegają podziałowi, jeśli krótsze - dopełnieniu.
+- Tokenizacja i słownik - Na podstawie całego korpusu budowany jest słownik tokenów. Każdy token dostaje swoje ID.
+  Tekst jest przekształcany w sekwencje ID tokenów.
+- Formatowanie do Treningu - Dane są dzielone na mniejsze części/sekwencje o ustalonej maksymalnej długości (np. 512,
+  768, 1024, itp..). Jeśli zdania są dłuższe podlegają podziałowi, jeśli krótsze - dopełnieniu.
 
 2. Określenie hiperparametrów modelu
 
-* Określenie hiperparametrów definiujących architekturę np: liczba warstw Encodera, liczba głowic uwagi, wymiar
+- Określenie hiperparametrów definiujących architekturę np: liczba warstw Encodera, liczba głowic uwagi, wymiar
   modelu (dmodel)
-* Hiperparametry definiujące trening np: liczba sekwencji przetwarzanych równolegle, liczba kroków optymalizacji, itp...
+- Hiperparametry definiujące trening np: liczba sekwencji przetwarzanych równolegle, liczba kroków optymalizacji, itp...
 
 3. Faza pretreningowa
 
-* Losowa inicjalizacja wag (Encoder, głowice MLM, tablice embeddings)
+- Losowa inicjalizacja wag (Encoder, głowice MLM, tablice embeddings)
 
-* Główna pętla treningowa:
+- Główna pętla treningowa:
 
 ```
   * Pobieranie minipartii - Z ogromnego datasetu pobierana jest mini-partia sekwencji tekstowych.
@@ -154,10 +154,10 @@ dopiero w fazie uczenia potreningowego).
 
 Są to np: 
  
-* Klasyfikacja sentymentu
-* Odpowiedzi na pytania
-* Streszczenia artykułów
-* itp..
+- Klasyfikacja sentymentu
+- Odpowiedzi na pytania
+- Streszczenia artykułów
+- itp..
 
 Należy zwrócić uwagę że w procesie uczenia, zbiór uczący podlega maskowaniu. W praktyce oznacza to, że w trakcie 
 treningu losowo wybierany jest pewien procent tokenów (np. 15% ), a następnie te wybrane tokeny jest zamieniana na 
@@ -178,7 +178,7 @@ Po wylosowaniu 15% tokenów dzieli się je na trzy podgrupy:
    zwyczajnie wyglądające słowo nadal może być zmuszony do jego przewidywania na podstawie kontekstu.
 3. 10% tokenów pozostaje niezmienionych. To uczy model, że czasami "prawdziwa odpowiedź" to słowo, które już widzi.
 
-Ta strategia wprowadza element szumu i niepewności, ucząć że token _[MASK]_ nie jest jedynym "sygnałem braku", a 
+Ta strategia wprowadza element szumu i niepewności, ucząc że token _[MASK]_ nie jest jedynym "sygnałem braku", a 
 także że musi polegać na kontekście, nawet jeśli napotka prawdziwe słowo.
 
 Żeby lepiej wyobrazić sobie konsekwencje tej strategii rozpatrzmy dwa zdania:
@@ -405,6 +405,6 @@ o długości _dmodel(np. 768)_ odpowiadający jednemu tokenowi.
 
 Ta finalna reprezentacja będzie podstawą do kolejnego etapu treningu - wykonywania zadań pretreningowych.
 
-#### Sposób działania Decodera ( w modelu Decoder-Only)
+#### Sposób działania Decodera (w modelu Decoder-Only)
 
 ![decoder.jpg](img/decoder.jpg)
