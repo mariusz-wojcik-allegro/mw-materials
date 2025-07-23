@@ -3,9 +3,9 @@
 ### Architektura LLM - Transformer
 
 W kontekście LLM, Transformer jest architekturą, która pozwala modelowi przetwarzać i rozumieć sekwencje danych (takich
-jak tekst) w sposób wysoce równoległy i efektywny, uchwytując złożone zależności kontekstowe. Zasadniczo, jest to "
-silnik", który pobiera numeryczne reprezentacje słów i przekształca je w reprezentacje, z których można generować nowy
-tekst lub odpowiadać na pytania.
+jak tekst) wychwytując złożone zależności kontekstowe. Zasadniczo, jest to "
+silnik", który pobiera numeryczne reprezentacje słów i przekształca je w reprezentacje, z których można generować 
+nowy tekst lub odpowiadać na pytania.
 
 Został on opisany w dokumencie [Attention Is All You Need](https://arxiv.org/pdf/1706.03762) , oraz [Czym jest i jak
 działa Transformer (sieć neuronowa)](https://miroslawmamczur.pl/czym-jest-i-jak-dziala-transformer-siec-neuronowa/
