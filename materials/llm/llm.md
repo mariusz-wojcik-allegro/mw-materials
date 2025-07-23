@@ -31,7 +31,7 @@ Language Understanding)**
 * Ekstrakcja informacji
 * Wyszukiwanie informacji
 
-Modele tego typu nie są najlepsze w generowaniu dłuższych tekstów. 
+Modele tego typu nie są najlepsze w generowaniu dłuższych tekstów.
 
 Najbardziej znany model z tego typu architekturą to **BERT (BIdeirectional Encoder Representations from Transformers)**
 
@@ -39,13 +39,16 @@ Najbardziej znany model z tego typu architekturą to **BERT (BIdeirectional Enco
 
 ![decoder.jpg](img/decoder.jpg)
 
-W tym typie architektury występuje wyłącznie stos komponentów **Decoder** , które ułożone są w nabudowane na siebie warstwy.
+W tym typie architektury występuje wyłącznie stos komponentów **Decoder** , które ułożone są w nabudowane na siebie
+warstwy.
 
-Model tego typu może czerpać kontekst tyko z tokenów które go poprzedzają w sekwencji. Nie może odnosić się do tokenów, które występują po nim.
+Model tego typu może czerpać kontekst tyko z tokenów które go poprzedzają w sekwencji. Nie może odnosić się do tokenów,
+które występują po nim.
 
 Uczy się przewidywać następny token na podstawie sekwencji poprzednich.
 
-Modele tego typu są wykorzystywane głównie w zadaniach generowania języka naturalnego **(NLG - Natural Language Generation)**
+Modele tego typu są wykorzystywane głównie w zadaniach generowania języka naturalnego **(NLG - Natural Language
+Generation)**
 
 * Generowanie tekstu (eseje, artykuły, wiersze, kod)
 * Tworzenie chatbotów
@@ -63,8 +66,8 @@ Ten rodzaj architektury wykorzystywany jest w modelach:
 ![transformer.jpg](img/transformer.jpg)
 
 Jest to pełna forma Transformera opisana w przywoływanym przeze mnie artykule [Attention Is All You Need]
-(https://arxiv.org/pdf/1706.03762) . Łączy ona w sobie cechy obydwu opisanych wcześniej topologii. Wykorzystuje 
-zarówno warstwy komponentów **Encoder** jak i **Decoder**. 
+(https://arxiv.org/pdf/1706.03762) . Łączy ona w sobie cechy obydwu opisanych wcześniej topologii. Wykorzystuje
+zarówno warstwy komponentów **Encoder** jak i **Decoder**.
 
 Architektura tego typu najlepiej nadaje się do zadań przekształcania sekwencji:
 
@@ -73,12 +76,11 @@ Architektura tego typu najlepiej nadaje się do zadań przekształcania sekwencj
 * Parafrazy
 * Konwersja danych do innego formatu
 
-
 ## Fazy przetwarzania modelu
 
-### Wstępny trening modelu LLM ( Pre-Training)
+### Wstępny trening modelu LLM ( Pre-Training) w architekturze Encoder-Only
 
-#### Stan początkowy - niewytrenowany model
+#### Przebieg procesu trenowania modelu LLM
 
 Przed wytrenowaniem model LLM to pusta sieć neuronowa. Jej parametry ( wagi połączeń pomiędzy neuronami ) są
 zainicjowane losowymi wartościami.
@@ -86,38 +88,63 @@ zainicjowane losowymi wartościami.
 Nie posiada wiedzy o języku, strukturze, gramatyce, nie zna żadnych słów.
 Zadanie jakiegokolwiek pytania do takiego modelu skutkowałoby wygenerowaniem wielu losowych znaków.
 
+Proces wstępnego uczenia modelu LLM (pre-training) jest złożony, spróbujmy jednak spojrzeć na niego z pewnego
+oddalenia. Można wyróżnić następujące jego etapy:
+
+1. Przygotowanie danych
+
+* Zbieranie i czyszczenie - Gromadzi się biliony tokenów surowego tekstu z Internetu (książki, artykuły, Wikipedia,
+  itp..)
+* Tokenizacja i słownik - Na podstawie całego korpusu budowany jest słownik tokenów. Każdy token dostaje ssoje ID.
+  Tekst jest przekształcany w siekwencje ID tokenów.
+* Formatowanie do Treningu - Dane są dzielone na mniejsze części/sekwencje o ustalonej maksymalnej długości (np. 512,
+  768,1024,itp..). Jeśli zdania są dłuższe podlegają podziałowi, jeśli krótsze - dopełnieniu.
+
+2. Określenie hiperparametrów modelu
+
+* Określenie hiperparametrów definiujących architekturę np: liczba warstw Encodera, liczba głowic uwagi, wymiar
+  modelu (dmodel)
+* Hiperparametry definiujące trening np: liczba sekwencji przetwarzanych równolegle, liczba kroków optymalizacji, itp...
+
+3. Faza pretreningowa
+
+* Losowa inicjalizacja wag (Encoder, głowice MLM, tablice embeddings)
+
+* Główna pętla treningowa:
+
 ```
-+--------------------------+
-|  Wejście (Tokeny/Embedingi) |
-+--------------------------+
-             |             
-             |  (Chaos Losowych Połączeń)
-             V             
-+--------------------------+
-|       Warstwa 1          |
-|    (Puste Wagi/Brak Wzorców) |
-+--------------------------+
-             |             
-             |  (Szum, Brak Organizacji)
-             V             
-+--------------------------+
-|       Warstwa 2          |
-|    (Brak Semantycznego Zrozumienia) |
-+--------------------------+
-             |             
-             |  (...)      
-             V             
-+--------------------------+
-|       Warstwa N          |
-|    (Brak Wyuczonych Relacji) |
-+--------------------------+
-             |             
-             |             
-             V             
-+--------------------------+
-| Wyjście (Losowe Przewidywania) |
-+--------------------------+
+  * Pobieranie minipartii - Z ogromnego datasetu pobierana jest mini-partia sekwencji tekstowych.
+  
+  * Dynamiczne maskowanie (MLM) - W mini-partii, w locie niektóre tokeny są maskowane zgodnie ze strategią MLM.
+  
+  * Przepływ do Enkodera - Sekwencje przetwarzane są do **Final Input Embeddings** i podawane do stosu **Enkoderów**.
+  
+  * Przetwarzanie w Enkoderze - Enkoder przetwarza sekwencje, tworzy bogate, kontekstualizowane reprezentacje dla
+    danego tokena.
+  
+  * Przekazanie do Głowic Predykcyjnych - Jest to etap przyuczania modelu do wykonywania działań, np: MLM - czyli
+    odgadywanie zamaskowanych tokenów. W tym kroku wytworzone przez Enkodery reprezentacje przekazywane są do
+    odpowiednich głowić (tu w zależności od zadań do których przeznaczony jest model, można wykorzystać różne głowice,
+    np: MLM Head - dla zamaskowanych tokenów).
+  
+  * Generowanie wektorów logit i obliczanie Strat - Głowicie predykcyjne generują wektory **logit** a po zastosowaniu
+    na nich odpowiednich funkcji - gotowych predykcji. Predykcje te porównywane są z odpowiedziami "prawdziwymi" (a
+    więc niezamaskowanymi, wzorcowymi). Na podstawie tych porównań obliczana jest **łączna funkcja straty** .
+  
+  * Wsteczna propagacja - Informacja o stracie (gradienty) jest propagowana wstecz przez cały model, od głowic
+    predykcyjnych, przez wszystkie warstwy Enkodera, aż do tablicy Embeddings. Te nowe, zaktualizowane wagi będą 
+    brane pod uwagę przy przetwarzaniu kolejnych sekwencji i minipartii modelu.
+  
+  * Aktualizacja wag - Algorytm optymalizacji używa gradientów do dostosowywania wag w modelu.
 ```
+
+* Monitorowanie postępów - Trening jest ciągle monitorowany, obserwuje się wartość funkcji straty (wraz z postępami
+  powinna ona spadać), mierzy się wydajność zbiorów walidacyjnych.
+
+4. Zakończenie pretrenowania
+
+Po tym etapie otrzymujemy **Model Bazowy** – potężny, ogólny model językowy, który rozumie gramatykę, semantykę i kontekst,
+ale nie jest jeszcze przystosowany do konkretnych zadań użytkownika.
 
 #### Słownik tokenów i macierz Input Embeddings
 
@@ -322,14 +349,13 @@ Wynik działania **FFN** poddawany jest operacjom **Add & Norm** i kierowany do 
 Przetwarzanie w kolejnych warstwach odbywa się w sposób analogiczny do opisanego wyżej. Należy jednak zwrócić uwagę na
 jeden bardzo istotny fakt. Wejściem dla pierwszej warstwy jest wektor  **Input Embedding** . To on jest podstawą
 wykonywanych w tej warstwie obliczeń. W przypadku kolejnych encoderów wejściem do warstwy jest wektor wyjściowy z
-warstwy poprzedniej. Dzięki temu następuje coraz większe doprecyzowanie kontekstu. 
+warstwy poprzedniej. Dzięki temu następuje coraz większe doprecyzowanie kontekstu.
 
-Po przetworzeniu przez wszystkie warstwy, dla każdego tokena w oryginalnej sekwencji otrzymujemy finalną 
-reprezentację w postaci wektora. Jest to więc macierz o wymiarach (_długość_sekwencjixdmodel_), kazdy wiersz to wektor 
-o długości _dmodel(np. 768)_ odpowiadający jednemu tokenowi. 
+Po przetworzeniu przez wszystkie warstwy, dla każdego tokena w oryginalnej sekwencji otrzymujemy finalną
+reprezentację w postaci wektora. Jest to więc macierz o wymiarach (_długość_sekwencjixdmodel_), kazdy wiersz to wektor
+o długości _dmodel(np. 768)_ odpowiadający jednemu tokenowi.
 
 Ta finalna reprezentacja będzie podstawą do kolejnego etapu treningu - wykonywania zadań pretreningowych.
-
 
 #### Sposób działania Decodera ( w modelu Decoder-Only)
 
