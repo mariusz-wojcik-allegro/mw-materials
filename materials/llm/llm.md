@@ -146,6 +146,33 @@ oddalenia. Można wyróżnić następujące jego etapy:
 Po tym etapie otrzymujemy **Model Bazowy** – potężny, ogólny model językowy, który rozumie gramatykę, semantykę i kontekst,
 ale nie jest jeszcze przystosowany do konkretnych zadań użytkownika.
 
+W procesie uczenia modelu bazowego występuje pojęcie dynamicznego maskowania, czy nie jest to jedno z zadań 
+użytkownika ? Okazuje się, że nie. Zadania 
+pretreningowe, takie jak np. MLM (maskowanie), czy NSP (dogenerowywanie) nie są celem samym w sobie. To tylko środek 
+do realizacji zadań użytkownika (a umiejętności ich realizacji model bazowy jeszcze nie posiada, ma pozyskać je 
+dopiero w fazie uczenia potreningowego). 
+
+Są to np: 
+ 
+* Klasyfikacja sentymentu
+* Odpowiedzi na pytania
+* Streszczenia artykułów
+* itp..
+
+Należy zwrócić uwagę że w procesie uczenia, zbiór uczący podlega maskowaniu. W praktyce oznacza to, że w trakcie 
+treningu losowo wybierany jest pewien procent tokenów (np. 15% ), a następnie te wybrane tokeny jest zamieniana na 
+specjalny token _[MASK]_ lub zamieniana na losowy token ze słownika. Te zmienione tokeny wędrują przez całą siatkę 
+Enkoderów. 
+
+Działanie takie nadaje modelom w architekturze Encoder-Only unikalne zdolności rozumienia języka. W trakcie uczenia 
+model dostrzega że token _[MASK]_ ma specjalny charakter, że mogą zostać za niego podstawiane inne tokeny. 
+
+Na przykład, w zdaniu "Natura [MASK] najpiękniejsze obrazy", aby poprawnie wstawić "stwarza", model musi zrozumieć, że "Natura" jest podmiotem, a "najpiękniejsze obrazy" są dopełnieniem, i że kontekst wskazuje na czynność kreacji.
+
+Gdyby Enkoder uczył się na danych niezamaskowanych, jego zdolność byłaby bardzo zredukowana. Nauczyłby się 
+odtwarzać następstwa słów bez konieczności zrozumienia zależności pomiędzy nimi.  
+
+
 #### Słownik tokenów i macierz Input Embeddings
 
 Zanim rozpocznie się faktyczny proces uczenia, konieczne jest przygotowanie dwóch powiązanych ze sobą struktur
