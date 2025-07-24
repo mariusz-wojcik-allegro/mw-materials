@@ -106,15 +106,6 @@ Proces wstępnego uczenia modelu LLM, czyli tzw. pre-training, jest złożony, a
 
 Po tym etapie otrzymujemy **Model Bazowy** – potężny, ogólny model językowy, który rozumie gramatykę, semantykę i kontekst, ale nie jest jeszcze przystosowany do konkretnych zadań użytkownika.
 
-W procesie uczenia modelu bazowego występuje pojęcie dynamicznego maskowania. Czy jest to jedno z zadań użytkownika? Okazuje się, że nie. Zadania pretreningowe, takie jak MLM (maskowanie) czy NSP (dogenerowywanie), nie są celem samym w sobie. To tylko środek do realizacji zadań użytkownika (a umiejętności ich realizacji model bazowy jeszcze nie posiada, ma je pozyskać dopiero w fazie uczenia potreningowego).
-
-Są to np.:
-
-- klasyfikacja sentymentu,
-- odpowiedzi na pytania,
-- streszczenia artykułów,
-- itp.
-
 #### Słownik tokenów i macierz Input Embeddings
 
 Zanim rozpocznie się faktyczny proces uczenia, konieczne jest przygotowanie dwóch powiązanych ze sobą struktur pomocniczych – **słownika tokenów** oraz **macierzy Input Embeddings**. Ich powstanie musi zostać poprzedzone stworzeniem jeszcze bardziej pierwotnej struktury – słownika tokenów.
@@ -258,7 +249,7 @@ Przetwarzanie w kolejnych warstwach odbywa się w sposób analogiczny do opisane
 
 Po przetworzeniu przez wszystkie warstwy, dla każdego tokena w oryginalnej sekwencji otrzymujemy finalną 
 reprezentację w postaci wektora. Zbiór tych wektorów dla całej sekwencji jest macierzą o wymiarach 
-(długość_sekwencji × dmodel), każdy wiersz to wektor o długości dmodel (np. 768) odpowiadający jednemu tokenowi.
+(długość_sekwencji × dmodel). Każdy wiersz to wektor o długości dmodel (np. 768) odpowiadający jednemu tokenowi.
 
 Macierz ta stanowi bogate źródło informacji o języku, ale nie jest jeszcze ostatecznym efektem procesu pretrenowania.
 
@@ -289,6 +280,7 @@ Po wylosowaniu 15% tokenów dzieli się je na trzy podgrupy:
 3. 10% tokenów pozostaje niezmienionych. To uczy model, że czasami „prawdziwa odpowiedź” to słowo, które już widzi.
 
 Ta strategia wprowadza element szumu i niepewności, ucząc, że token _[MASK]_ nie jest jedynym „sygnałem braku”, a także że musi polegać na kontekście, nawet jeśli napotka prawdziwe słowo.
+
 
 Aby lepiej wyobrazić sobie konsekwencje tej strategii, rozpatrzmy dwa zdania:
 
