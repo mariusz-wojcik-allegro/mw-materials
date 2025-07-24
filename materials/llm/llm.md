@@ -267,11 +267,11 @@ Zatem posługując się identyfikatorem pozycji tokenu jak łącznikiem możemy 
 | 2       | "najpiękniejsze" | [0.09, 0.10, 0.11, 0.12]                     |
 | 3       | "obrazy"         | [0.13, 0.14, 0.15, 0.16]                     |
 
-Dla każdego elementu mamy do dyspozycji dwa wektory embeddings, po jednym z każdej tabeli.
+Dla każdego elementu mamy do dyspozycji dwa wektory embeddingów, po jednym z każdej tabeli.
 
-Teraz dla każdego tokenu dokonujemy sumowania embeddingów i w ten sposób powstanie **Final Input Embedding**, który ma
-zakodowaną informację zarówno o znaczeniu semantycznym tokenu, jak i jego pozycji w sekwencji. **Final Input
-Embedding** jest to struktura, która będzie wykorzystywana w dalszym procesie uczenia.
+Następnie, dla każdego tokenu sumujemy oba embeddingi, tworząc tzw. **Final Input Embedding**. Dzięki temu powstaje
+wektor, który zawiera informacje zarówno o znaczeniu semantycznym tokenu, jak i o jego pozycji w sekwencji. Taka
+reprezentacja jest wykorzystywana w dalszych etapach uczenia modelu.
 
 | Pozycja | Token            | ID  | Input Embedding (4 liczby) | Wektor Kodowania Pozycyjnego (PE) - Wymiar 4 | Finalny Input Embedding (Sumowany) |
 |---------|------------------|-----|----------------------------|----------------------------------------------|------------------------------------|
@@ -280,20 +280,18 @@ Embedding** jest to struktura, która będzie wykorzystywana w dalszym procesie 
 | 2       | "najpiękniejsze" | 489 | [0.03, 0.65, -0.44, -0.19] | [0.09, 0.10, 0.11, 0.12]                     | [0.12, 0.75, -0.33, -0.07]         |
 | 3       | "obrazy"         | 522 | [0.88, -0.11, 0.29, -0.73] | [0.13, 0.14, 0.15, 0.16]                     | [1.01, 0.03, 0.44, -0.57]          |
 
-Wektor wynikowy jest unikalny dla konkretnego słowa na konkretnej pozycji. Dalsze warstwy transformera, a zwłaszcza
-mechanizm uwagi są sieciami neuronowymi, które podczas treningu uczą się jak interpretować te wzbogacone wektory.
+Wektor wynikowy jest unikalny dla konkretnego słowa na określonej pozycji. Kolejne warstwy transformera, a zwłaszcza
+mechanizm uwagi, uczą się podczas treningu, jak interpretować te wzbogacone wektory.
 
-Finalny wektor **Input Embedding** jest skonstruowany w taki sposób, aby słowa o podobnym znaczeniu miały podobne
-wektory (czyli znalazły się blisko siebie w przestrzeni wielowymiarowej). Wymiar tej przestrzeni jest ograniczony
-wymiarem wektora **Input Embedding**. Jeśli ma on długość 768 to znaczy że każde słowo, lub token reprezentowane
-jest jako punkt w 768 wymiarowej przestrzeni wektorowej.
+Finalny **Input Embedding** jest skonstruowany tak, by słowa o podobnym znaczeniu miały podobne wektory, czyli
+znajdowały się blisko siebie w przestrzeni wielowymiarowej. Wymiar tej przestrzeni jest określony przez długość wektora
+embeddingu (np. 768). Każdy token jest więc reprezentowany jako punkt w tej przestrzeni.
 
-Dla lepszego zrozumienia można posłużyć się analogią do smaku potrawy:
-
-Składa się z wielu składników, które są ze sobą wymieszane. Nie "rozdzielasz" ich w ustach, ale twój mózg uczy się
-rozpoznawać poszczególne smaki i ich kombinacje. Podobnie Transformer uczy się, że pewne kombinacje wartości w
-wektorze (które wynikają z sumy V_słowo i PE) sygnalizują, że "to jest rzeczownik na początku zdania", a inne
-kombinacje, że "to jest czasownik w środku zdania".
+Aby lepiej to zrozumieć, można posłużyć się analogią do smaku potrawy: składa się ona z wielu składników, które są ze
+sobą wymieszane. Nie rozdzielamy ich w ustach, ale nasz mózg rozpoznaje poszczególne smaki i ich kombinacje. Podobnie
+Transformer uczy się, że pewne kombinacje wartości w wektorze (wynikające z sumy embeddingu słowa i embeddingu
+pozycyjnego) sygnalizują, że np. "to jest rzeczownik na początku zdania", a inne – że "to jest czasownik w środku
+zdania".
 
 #### Sposób działania Encodera ( w modelu Encoder-Only)
 
