@@ -115,25 +115,6 @@ Są to np.:
 - streszczenia artykułów,
 - itp.
 
-Warto zwrócić uwagę, że w procesie uczenia zbiór uczący podlega maskowaniu. W praktyce oznacza to, że w trakcie treningu losowo wybierany jest pewien procent tokenów (np. 15%), a następnie te wybrane tokeny są zamieniane na specjalny token _[MASK]_ lub na losowy token ze słownika. Te zmienione tokeny przechodzą przez całą siatkę Encoderów, więc również dla nich budowana jest reprezentacja kontekstowa. Fakt ten jest źródłem pewnej przypadłości (szczególnie wczesnych modeli) nazywanej _mask token toxicity_. Polega ona na tym, że model, który w danych uczących stosunkowo często napotyka token _[MASK]_, może uznać go za „szczególnie ważny” i zacząć go nadmiernie używać w swoich odpowiedziach, szczególnie gdy nie jest ich pewny.
-
-Aby zminimalizować to ryzyko, stosuje się zaawansowane techniki maskowania, np.:
-
-Po wylosowaniu 15% tokenów dzieli się je na trzy podgrupy:
-
-1. 80% z nich jest faktycznie zastępowana tokenem _[MASK]_. To jest główne zadanie, które zmusza model do uczenia się kontekstu. Model uczy się, że jest to token specjalny (jego embedding nie reprezentuje żadnego znaczenia w języku), którego wartość należy wywnioskować na podstawie analizy jego bezpośredniego otoczenia.
-2. 10% tokenów z tej grupy jest zastępowana losowym tokenem ze słownika. To uczy model, że nawet jeśli napotka zwyczajnie wyglądające słowo, nadal może być zmuszony do jego przewidywania na podstawie kontekstu.
-3. 10% tokenów pozostaje niezmienionych. To uczy model, że czasami „prawdziwa odpowiedź” to słowo, które już widzi.
-
-Ta strategia wprowadza element szumu i niepewności, ucząc, że token _[MASK]_ nie jest jedynym „sygnałem braku”, a także że musi polegać na kontekście, nawet jeśli napotka prawdziwe słowo.
-
-Aby lepiej wyobrazić sobie konsekwencje tej strategii, rozpatrzmy dwa zdania:
-
-``` Natura opona najpiękniejsze obrazy. ```
-``` Opona jest ważną częścią koła samochodowego. ```
-
-W pierwszym przypadku słowo _opona_ jest przykładem tokenu maskującego, który został losowo wybrany ze słownika. Model będzie próbował budować reprezentację kontekstową wszystkich tokenów, uwzględniając słowo _opona_ jako zwyczajny element otoczenia. Model zakoduje informację o tym, że słowo _opona_ znajduje się w otoczeniu _Natura_, _najpiękniejsze_ i _obrazy_. Wewnętrznie model będzie „czuł”, że słowo to wprowadza niespójność i że jest ono mało prawdopodobne w porównaniu do innych sekwencji, z którymi się spotkał, np. _Opona jest ważną częścią koła samochodowego_. Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem będą słabsze, przez co model uczy się, że taka kombinacja liczb jest nietypowa.
-
 #### Słownik tokenów i macierz Input Embeddings
 
 Zanim rozpocznie się faktyczny proces uczenia, konieczne jest przygotowanie dwóch powiązanych ze sobą struktur pomocniczych – **słownika tokenów** oraz **macierzy Input Embeddings**. Ich powstanie musi zostać poprzedzone stworzeniem jeszcze bardziej pierwotnej struktury – słownika tokenów.
@@ -284,7 +265,40 @@ Macierz ta stanowi bogate źródło informacji o języku, ale nie jest jeszcze o
 Ta finalna reprezentacja stanowi punkt wyjścia do kolejnego etapu treningu – realizacji zadań pretreningowych. Są 
 one wykonywane przez specjalne komponenty zwane **głowicami predykcyjnymi (prediction heads)**. Ich zadaniem jest przekształcenie kontekstualizowanej macierzy reprezentacji, stworzonej przez Enkoder, w konkretne predykcje. Następnie te przewidywania są porównywane z danymi wzorcowymi, co pozwala obliczyć funkcję straty – miarę poprawności działania modelu. Na tej podstawie aktualizowane są wagi sieci, co prowadzi do stopniowego doskonalenia modelu.
 
--  
+W przypadku architektury **Encoder-Only** najczęściej stosuje się dwa rodzaje głowic predykcyjnych:
+
+1. **Masked Language Modeling (MLM)** 
+2. **Next Sentence Prediction (NSP)**
+
+##### Głowica Masked Language Modeling
+
+Głowica ta realizuje zadanie polegające na przewidywaniu zamaskowanego tokenu. Na wejściu przekazywana jest do niej 
+sekwencja ```Natura [MASK] najpiękniejsze obrazy```. Zadaniem głowicy jest odkrycie jaki token uległ zamaskowaniu. 
+Do realizacji tego zadania wykorzystuje macierz kontekstualizacji, która przekazana została z ostatniej warstwy 
+enkodera.  
+
+Warto zwrócić uwagę, że w procesie uczenia zbiór uczący podlega maskowaniu. W praktyce oznacza to, że w trakcie 
+treningu losowo wybierany jest pewien procent tokenów (np. 15%), a następnie te wybrane tokeny są zamieniane na specjalny token _[MASK]_ lub na losowy token ze słownika. Te zmienione tokeny przechodzą przez całą siatkę Enkoderów, więc również dla nich budowana jest reprezentacja kontekstowa. Fakt ten jest źródłem pewnej przypadłości (szczególnie wczesnych modeli) nazywanej _mask token toxicity_. Polega ona na tym, że model, który w danych uczących stosunkowo często napotyka token _[MASK]_, może uznać go za „szczególnie ważny” i zacząć go nadmiernie używać w swoich odpowiedziach, szczególnie gdy nie jest ich pewny.
+
+Aby zminimalizować to ryzyko, stosuje się zaawansowane techniki maskowania, np.:
+
+Po wylosowaniu 15% tokenów dzieli się je na trzy podgrupy:
+
+1. 80% z nich jest faktycznie zastępowana tokenem _[MASK]_. To jest główne zadanie, które zmusza model do uczenia się kontekstu. Model uczy się, że jest to token specjalny (jego embedding nie reprezentuje żadnego znaczenia w języku), którego wartość należy wywnioskować na podstawie analizy jego bezpośredniego otoczenia.
+2. 10% tokenów z tej grupy jest zastępowana losowym tokenem ze słownika. To uczy model, że nawet jeśli napotka zwyczajnie wyglądające słowo, nadal może być zmuszony do jego przewidywania na podstawie kontekstu.
+3. 10% tokenów pozostaje niezmienionych. To uczy model, że czasami „prawdziwa odpowiedź” to słowo, które już widzi.
+
+Ta strategia wprowadza element szumu i niepewności, ucząc, że token _[MASK]_ nie jest jedynym „sygnałem braku”, a także że musi polegać na kontekście, nawet jeśli napotka prawdziwe słowo.
+
+Aby lepiej wyobrazić sobie konsekwencje tej strategii, rozpatrzmy dwa zdania:
+
+``` Natura opona najpiękniejsze obrazy. ```
+``` Opona jest ważną częścią koła samochodowego. ```
+
+W pierwszym przypadku słowo _opona_ jest przykładem tokenu maskującego, który został losowo wybrany ze słownika. Model będzie próbował budować reprezentację kontekstową wszystkich tokenów, uwzględniając słowo _opona_ jako zwyczajny element otoczenia. Model zakoduje informację o tym, że słowo _opona_ znajduje się w otoczeniu _Natura_, _najpiękniejsze_ i _obrazy_. Wewnętrznie model będzie „czuł”, że słowo to wprowadza niespójność i że jest ono mało prawdopodobne w porównaniu do innych sekwencji, z którymi się spotkał, np. _Opona jest ważną częścią koła samochodowego_. Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem będą słabsze, przez co model uczy się, że taka kombinacja liczb jest nietypowa.
+
+##### Głowica Next Sentence Prediction 
+
 
 #### Sposób działania Decodera (w modelu Decoder-Only)
 
