@@ -279,9 +279,9 @@ Po przetworzeniu przez wszystkie warstwy, dla każdego tokena w oryginalnej sekw
 reprezentację w postaci wektora. Zbiór tych wektorów dla całej sekwencji jest macierzą o wymiarach 
 (długość_sekwencji × dmodel), każdy wiersz to wektor o długości dmodel (np. 768) odpowiadający jednemu tokenowi.
 
-Ta finalna reprezentacja będzie podstawą do kolejnego etapu treningu – wykonywania zadań pretreningowych.
-
-
+Macierz ta stanowi bogate źródło informacji o języku, ale nie jest jeszcze ostatecznym efektem procesu pretrenowania.
+Zgromadzone w niej dane nie przekładają się bezpośrednio na iteracyjny proces nauki ani ocenę postępów. Dlatego konieczne jest wprowadzenie dodatkowego elementu architektonicznego, który potrafi wykorzystać tę macierz do przewidywania oraz oceny skuteczności tych przewidywań. Na tej podstawie obliczana jest funkcja straty, która pozwala mierzyć efektywność nauki.
+W architekturze **Encoder-Only** rolę tę pełnią tzw. **Głowice Predykcyjne**. W fazie pretreningu ich zadaniem jest realizacja specjalnych zadań pretreningowych, które są kluczowe dla przygotowania modelu do dalszej pracy i rozwiązywania konkretnych problemów.
 
 #### Sposób działania Decodera (w modelu Decoder-Only)
 
