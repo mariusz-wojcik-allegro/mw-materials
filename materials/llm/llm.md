@@ -17,23 +17,20 @@ które ma wykonywać model. Różnią się one tym które bloki **(Encoder/Decod
 
 ![encoder.jpg](img/encoder.jpg)
 
-Ten typ architektury składa się wyłącznie ze stosu komponentów **Encoder** . Występuje w nim wiele warstw Encoderów
-nabudowanych jedna na drugiej.
-Przy uczeniu każdy token może widzieć i czerpać kontekst ze wszystkich innych tokenów w sekwencji.
+Ten typ architektury składa się wyłącznie ze stosu komponentów **Encoder**. Oznacza to, że wiele warstw Encoderów jest ułożonych jedna na drugiej, tworząc złożoną strukturę. Podczas uczenia każdy token ma dostęp do kontekstu wszystkich pozostałych tokenów w sekwencji, co pozwala modelowi lepiej rozumieć znaczenie tekstu.
 
-Modele tego rodzaju osiągają najlepsze wyniki w realizacji zadania rozumienia języka naturalnego **(NLU- Natural
-Language Understanding)**
+Modele oparte na tej architekturze osiągają bardzo dobre wyniki w zadaniach związanych z rozumieniem języka naturalnego (**NLU – Natural Language Understanding**), takich jak:
 
-- Klasyfikacja tekstu (np. analiza sentymentu, wykrywanie spamu)
-- Odpowiadanie na pytania do tekstu (najlepiej z wyborem)
-- Rozpoznawanie nazwanych encji (NER) czyli np. wyszukiwanie nazw własnych, kolorów itp.
-- Rozumienie relacji logicznych w tekście
-- Ekstrakcja informacji
-- Wyszukiwanie informacji
+- klasyfikacja tekstu (np. analiza sentymentu, wykrywanie spamu),
+- odpowiadanie na pytania dotyczące tekstu (szczególnie z wyborem odpowiedzi),
+- rozpoznawanie nazwanych encji (NER), czyli wyszukiwanie nazw własnych, kolorów itp.,
+- rozumienie relacji logicznych w tekście,
+- ekstrakcja informacji,
+- wyszukiwanie informacji.
 
-Modele tego typu nie są najlepsze w generowaniu dłuższych tekstów.
+Warto jednak zaznaczyć, że modele tego typu nie sprawdzają się najlepiej w generowaniu dłuższych tekstów.
 
-Najbardziej znany model z tego typu architekturą to **BERT (BIdeirectional Encoder Representations from Transformers)**
+Najbardziej znanym przedstawicielem tej architektury jest **BERT (Bidirectional Encoder Representations from Transformers)**
 
 2. **Decoder Only**
 
@@ -117,7 +114,6 @@ oddalenia. Można wyróżnić następujące jego etapy:
   
   * Dynamiczne maskowanie (MLM) - W mini-partii, w locie niektóre tokeny są maskowane zgodnie ze strategią MLM.
   
-  * Przepływ do Enkodera - Sekwencje przetwarzane są do **Final Input Embeddings** i podawane do stosu **Enkoderów**.
   
   * Przetwarzanie w Enkoderze - Enkoder przetwarza sekwencje, tworzy bogate, kontekstualizowane reprezentacje dla
     danego tokena.
