@@ -275,9 +275,13 @@ Wynik działania **FFN** poddawany jest operacjom **Add & Norm** i kierowany do 
 
 Przetwarzanie w kolejnych warstwach odbywa się w sposób analogiczny do opisanego wyżej. Warto zwrócić uwagę na jeden istotny fakt: wejściem dla pierwszej warstwy jest wektor **Input Embedding**. To on jest podstawą obliczeń w tej warstwie. W przypadku kolejnych encoderów wejściem do warstwy jest wektor wyjściowy z warstwy poprzedniej. Dzięki temu następuje coraz większe doprecyzowanie kontekstu.
 
-Po przetworzeniu przez wszystkie warstwy, dla każdego tokena w oryginalnej sekwencji otrzymujemy finalną reprezentację w postaci wektora. Jest to macierz o wymiarach (długość_sekwencji × dmodel), każdy wiersz to wektor o długości dmodel (np. 768) odpowiadający jednemu tokenowi.
+Po przetworzeniu przez wszystkie warstwy, dla każdego tokena w oryginalnej sekwencji otrzymujemy finalną 
+reprezentację w postaci wektora. Zbiór tych wektorów dla całej sekwencji jest macierzą o wymiarach 
+(długość_sekwencji × dmodel), każdy wiersz to wektor o długości dmodel (np. 768) odpowiadający jednemu tokenowi.
 
 Ta finalna reprezentacja będzie podstawą do kolejnego etapu treningu – wykonywania zadań pretreningowych.
+
+
 
 #### Sposób działania Decodera (w modelu Decoder-Only)
 
