@@ -280,8 +280,11 @@ reprezentację w postaci wektora. Zbiór tych wektorów dla całej sekwencji jes
 (długość_sekwencji × dmodel), każdy wiersz to wektor o długości dmodel (np. 768) odpowiadający jednemu tokenowi.
 
 Macierz ta stanowi bogate źródło informacji o języku, ale nie jest jeszcze ostatecznym efektem procesu pretrenowania.
-Zgromadzone w niej dane nie przekładają się bezpośrednio na iteracyjny proces nauki ani ocenę postępów. Dlatego konieczne jest wprowadzenie dodatkowego elementu architektonicznego, który potrafi wykorzystać tę macierz do przewidywania oraz oceny skuteczności tych przewidywań. 
-W architekturze **Encoder-Only** rolę tę pełnią tzw. **Głowice Predykcyjne**. W fazie pretreningu ich zadaniem jest realizacja specjalnych zadań pretreningowych, które są kluczowe dla przygotowania modelu do dalszej pracy i rozwiązywania konkretnych problemów.
+
+Ta finalna reprezentacja stanowi punkt wyjścia do kolejnego etapu treningu – realizacji zadań pretreningowych. Są 
+one wykonywane przez specjalne komponenty zwane **głowicami predykcyjnymi (prediction heads)**. Ich zadaniem jest przekształcenie kontekstualizowanej macierzy reprezentacji, stworzonej przez Enkoder, w konkretne predykcje. Następnie te przewidywania są porównywane z danymi wzorcowymi, co pozwala obliczyć funkcję straty – miarę poprawności działania modelu. Na tej podstawie aktualizowane są wagi sieci, co prowadzi do stopniowego doskonalenia modelu.
+
+-  
 
 #### Sposób działania Decodera (w modelu Decoder-Only)
 
