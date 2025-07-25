@@ -263,28 +263,44 @@ W przypadku architektury **Encoder-Only** najczęściej stosuje się dwa rodzaje
 
 ##### Głowica Masked Language Modeling
 
-Głowica ta realizuje zadanie polegające na przewidywaniu zamaskowanego tokenu. Na wejściu przekazywana jest do niej 
-sekwencja ```Natura [MASK] najpiękniejsze obrazy```. Zadaniem głowicy jest odkrycie jaki token uległ zamaskowaniu. 
-Do realizacji tego zadania wykorzystuje macierz kontekstualizacji, która przekazana została z ostatniej warstwy 
-enkodera.  
+Zadniem tej głowicy jest przewidywanie zamaskowanych tokenów. W sentencji trafiającej do 
+analizy ukrywany jest jeden token. Zadaniem modelu (głowicy MLM) jest analiza zależności dostarczonych jej w 
+macierzy kontekstualizacji, wykonanie odpowiednich predykcji i wybór odpowiedniego słowa.
 
-Warto zwrócić uwagę, że w procesie uczenia zbiór uczący podlega maskowaniu. W praktyce oznacza to, że w trakcie 
-treningu losowo wybierany jest pewien procent tokenów (np. 15%), a następnie te wybrane tokeny są zamieniane na specjalny token _[MASK]_ lub na losowy token ze słownika. Te zmienione tokeny przechodzą przez całą siatkę Enkoderów, więc również dla nich budowana jest reprezentacja kontekstowa. Fakt ten jest źródłem pewnej przypadłości (szczególnie wczesnych modeli) nazywanej _mask token toxicity_. Polega ona na tym, że model, który w danych uczących stosunkowo często napotyka token _[MASK]_, może uznać go za „szczególnie ważny” i zacząć go nadmiernie używać w swoich odpowiedziach, szczególnie gdy nie jest ich pewny.
+Głowica musi porównać trafność własnego przewidywania i ocenić jak bardzo odbiega ono od odpowiedzi wzorcowej (która 
+jest znana głowicy).  Głowica wykorzystuje do tego funkcję straty. Na podstawie analizy jej wartości ocenia 
+skalę rozbieżności. 
 
-Aby zminimalizować to ryzyko, stosuje się zaawansowane techniki maskowania, np.:
+Przy pomocy algorytmów propagacji wstecznej wielkość ta jest dostarczana do kluczowych elementów całego modelu i 
+wykorzystywana do modyfikacji kluczowych parametrów i modyfikacji wag. 
 
-Po wylosowaniu 15% tokenów dzieli się je na trzy podgrupy:
+Korekty te będą miały wpływ na następne sekwencje przetwarzane przez model. 
 
-1. 80% z nich jest faktycznie zastępowana tokenem _[MASK]_. To jest główne zadanie, które zmusza model do uczenia się kontekstu. Model uczy się, że jest to token specjalny (jego embedding nie reprezentuje żadnego znaczenia w języku), którego wartość należy wywnioskować na podstawie analizy jego bezpośredniego otoczenia.
-2. 10% tokenów z tej grupy jest zastępowana losowym tokenem ze słownika. To uczy model, że nawet jeśli napotka zwyczajnie wyglądające słowo, nadal może być zmuszony do jego przewidywania na podstawie kontekstu.
-3. 10% tokenów pozostaje niezmienionych. To uczy model, że czasami „prawdziwa odpowiedź” to słowo, które już widzi.
+Skuteczne działanie głowicy wymaga zamaskowania danych, które biorą udział w procesie budowania kontekstu.
 
-Ta strategia wprowadza element szumu i niepewności, ucząc, że token _[MASK]_ nie jest jedynym „sygnałem braku”, a także że musi polegać na kontekście, nawet jeśli napotka prawdziwe słowo.
+Maskowanie odbywa się według następującej strategii:
 
+1. Wybiera się losową próbkę ok. 15% tokenów
+2. 80% z nich zastępuje się tokenem specjalnym _[MASK]_
+3. 10% jest zastępowane losowym tokenem ze słownika
+4. 10% pozostaje niezmienionych
+
+Każdorazowo, model zapamiętuje który token został zamaskowany i jaka była jego oryginalna wartość. Jest to tzw 
+_ground truth_, która będzie grała kluczową rolę na dalszym etapie procesu, przy ewaluacji zrealizowanej przez model 
+predykcji.
+
+Zamaskowane tokeny wędrują przez całą siatkę enkoderów, które budują dla nich wektory kontekstualizacji. Z czasem 
+model uczy się że nie są to zwykłe słowa, lecz takie, które do końca pasują one do otoczenia.
+
+Strategia ta wymusza jego kreatywność, ciągłą analizę kontekstu sąsiedztwa. Przeciwdziała uczeniu schematycznemu. 
+
+Stosowanie maskowania przy pomocy losowych tokenów i tokenów niezmienionych pozwala uniknąć problemu zwanego _mask 
+token toxicity_. Polega ona na tym, że model, który w danych uczących stosunkowo często napotyka token _[MASK]_, może uznać go za „szczególnie ważny” i zacząć go nadmiernie używać w swoich odpowiedziach, szczególnie gdy nie jest ich pewny.
 
 Aby lepiej wyobrazić sobie konsekwencje tej strategii, rozpatrzmy dwa zdania:
 
 ``` Natura opona najpiękniejsze obrazy. ```
+
 ``` Opona jest ważną częścią koła samochodowego. ```
 
 W pierwszym przypadku słowo _opona_ jest przykładem tokenu maskującego, który został losowo wybrany ze słownika. Model będzie próbował budować reprezentację kontekstową wszystkich tokenów, uwzględniając słowo _opona_ jako zwyczajny element otoczenia. Model zakoduje informację o tym, że słowo _opona_ znajduje się w otoczeniu _Natura_, _najpiękniejsze_ i _obrazy_. Wewnętrznie model będzie „czuł”, że słowo to wprowadza niespójność i że jest ono mało prawdopodobne w porównaniu do innych sekwencji, z którymi się spotkał, np. _Opona jest ważną częścią koła samochodowego_. Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem będą słabsze, przez co model uczy się, że taka kombinacja liczb jest nietypowa.
