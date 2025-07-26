@@ -249,11 +249,14 @@ Przetwarzanie w kolejnych warstwach odbywa się w sposób analogiczny do opisane
 
 Po przetworzeniu przez wszystkie warstwy, dla każdego tokena w oryginalnej sekwencji otrzymujemy finalną 
 reprezentację w postaci wektora. Zbiór tych wektorów dla całej sekwencji jest macierzą o wymiarach 
-(długość_sekwencji × dmodel). Każdy wiersz to wektor o długości dmodel (np. 768) odpowiadający jednemu tokenowi.
+(długość_sekwencji × dmodel). Każdy wiersz to wektor o długości dmodel (np. 768) odpowiadający jednemu tokenowi z 
+sekwencji.
 
-Macierz ta stanowi bogate źródło informacji o języku, ale nie jest jeszcze ostatecznym efektem procesu pretrenowania.
+Wektor kontekstualizacji (oraz stanowiąca ich zbiór macierz) jest to chwilowa, dynamiczna reprezentacja dla tego 
+konkretnego wystąpienia tokena (czyli w tej danej sekwencji i sytuacji). Jest to więc informacja o kontekście lokalnym. 
 
-Ta finalna reprezentacja stanowi punkt wyjścia do kolejnego etapu treningu – realizacji zadań pretreningowych. Są 
+Macierz ta nie jest jeszcze ostatecznym efektem procesu pretrenowania. Stanowi ona punkt wyjścia do kolejnego etapu 
+treningu – realizacji zadań pretreningowych. Są 
 one wykonywane przez specjalne komponenty zwane **głowicami predykcyjnymi (prediction heads)**. Ich zadaniem jest przekształcenie kontekstualizowanej macierzy reprezentacji, stworzonej przez Enkoder, w konkretne predykcje. Następnie te przewidywania są porównywane z danymi wzorcowymi, co pozwala obliczyć funkcję straty – miarę poprawności działania modelu. Na tej podstawie aktualizowane są wagi sieci, co prowadzi do stopniowego doskonalenia modelu.
 
 W przypadku architektury **Encoder-Only** najczęściej stosuje się dwa rodzaje głowic predykcyjnych:
@@ -276,6 +279,10 @@ wykorzystywana do modyfikacji kluczowych parametrów i modyfikacji wag.
 
 Korekty te będą miały wpływ na następne sekwencje przetwarzane przez model. 
 
+Warto zwrócić uwagę na fakt, że cała wiedza o języku, która pozwala wyciągać wnioski i uzupełniać brakujące 
+fragmenty sekwencji jest zgromadzona w **podlegających procesowi uczenia parametrach modelu, a w szczególności 
+w wagach w całego modelu Transformatorowego** (a nie w macierzach kontekstualizacji)!
+
 Skuteczne działanie głowicy wymaga zamaskowania danych, które biorą udział w procesie budowania kontekstu.
 
 Maskowanie odbywa się według następującej strategii:
@@ -294,6 +301,27 @@ model uczy się że nie są to zwykłe słowa, lecz takie, które do końca pasu
 
 Strategia ta wymusza jego kreatywność, ciągłą analizę kontekstu sąsiedztwa. Przeciwdziała uczeniu schematycznemu. 
 
+Spróbujmy przeanalizować następujący przykład:
+
+``` Natura [MASK] najpiękniejsze obrazy. ```
+
+Gdy sekwencja ta dociera do głowicy MLM dysponuje ona jej wektorem kontekstualizacji, nazwijmy go `H_[MASK]` . 
+Wektor ten nie zawiera informacji o tym, w jakich kontekstach wystąpił ten token w danych uczących (a przecież mogły 
+ich być miliony). Wyraźnie powtórzmy to jeszcze raz. Został on stworzony przez model na potrzeby tej jednej, 
+konkretnej sekwencji. 
+
+Model wie, że w tym miejscu czegoś brakuje, i że trzeba to przewidzieć na podstawie wektora `H_[MASK]`, który 
+zawiera informacje o otoczeniu tego tokena (agreguje informacje o innych tokenach tej sekwencji). Zostało to zakodowane 
+przez  mechanizm uwagi. Sam model potrafi 
+wnioskować, że np: po słowie "Natura" często pojawiają się słowa związane ze sztuką, pięknem, że struktura zdania 
+wskazuje na potrzebę zastosowania czasownika,oraz że czasowniki do 
+niego pasujące to np: rodzi, tworzy.  
+
+Jak model rozumie te podobieństwa i korelacje ? Okazuje się, że kluczowy jest tutaj wektor `H_[MASK]`, który staje 
+się dla niego punktem w przestrzeni wielowymiarowej. Głowica MLM następnie odnajduje wśród wszystkich słów w 
+słowniku, te które mają zbliżone reprezentacje wektorowe. Będą to właśnie czaowniki związane ze sztuką i tworzeniem, 
+ponieważ model widział je w podobonych kontekstach miliardy razy.  
+
 Stosowanie maskowania przy pomocy losowych tokenów i tokenów niezmienionych pozwala uniknąć problemu zwanego _mask 
 token toxicity_. Polega ona na tym, że model, który w danych uczących stosunkowo często napotyka token _[MASK]_, może uznać go za „szczególnie ważny” i zacząć go nadmiernie używać w swoich odpowiedziach, szczególnie gdy nie jest ich pewny.
 
@@ -303,7 +331,10 @@ Aby lepiej wyobrazić sobie konsekwencje tej strategii, rozpatrzmy dwa zdania:
 
 ``` Opona jest ważną częścią koła samochodowego. ```
 
-W pierwszym przypadku słowo _opona_ jest przykładem tokenu maskującego, który został losowo wybrany ze słownika. Model będzie próbował budować reprezentację kontekstową wszystkich tokenów, uwzględniając słowo _opona_ jako zwyczajny element otoczenia. Model zakoduje informację o tym, że słowo _opona_ znajduje się w otoczeniu _Natura_, _najpiękniejsze_ i _obrazy_. Wewnętrznie model będzie „czuł”, że słowo to wprowadza niespójność i że jest ono mało prawdopodobne w porównaniu do innych sekwencji, z którymi się spotkał, np. _Opona jest ważną częścią koła samochodowego_. Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem będą słabsze, przez co model uczy się, że taka kombinacja liczb jest nietypowa.
+W pierwszym przypadku słowo _opona_ jest przykładem tokenu maskującego, który został losowo wybrany ze słownika. Model będzie próbował budować reprezentację kontekstową wszystkich tokenów, uwzględniając słowo _opona_ jako zwyczajny element otoczenia. Model zakoduje informację o tym, że słowo _opona_ znajduje się w otoczeniu _Natura_, _najpiękniejsze_ i _obrazy_. Wewnętrznie model będzie „czuł”, że słowo to wprowadza niespójność i że jest ono mało prawdopodobne w porównaniu do innych sekwencji, z którymi się spotkał, np. _Opona jest ważną częścią koła samochodowego_. Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem będą słabsze, przez co model uczy się, 
+
+
+Na uwagę zasługuje jeszcze sam sposób wykonywania predykcji. 
 
 ##### Głowica Next Sentence Prediction 
 
