@@ -305,9 +305,8 @@ Spróbujmy przeanalizować następujący przykład:
 
 ``` Natura [MASK] najpiękniejsze obrazy. ```
 
-Gdy sekwencja ta dociera do głowicy MLM dysponuje ona jej wektorem kontekstualizacji, nazwijmy go `H_[MASK]` . 
-Wektor ten nie zawiera informacji o tym, w jakich kontekstach wystąpił ten token w danych uczących (a przecież mogły 
-ich być miliony). Wyraźnie powtórzmy to jeszcze raz. Został on stworzony przez model na potrzeby tej jednej, 
+Gdy zamaskowany token dociera do głowicy MLM dysponuje ona jego wektorem kontekstualizacji, nazwijmy go `H_[MASK]
+`. Wektor ten nie zawiera informacji o tym, w jakich kontekstach wystąpił ten token w danych uczących (a przecież mogły ich być miliony). Wyraźnie powtórzmy to jeszcze raz. Został on stworzony przez model na potrzeby tej jednej, 
 konkretnej sekwencji. 
 
 Model wie, że w tym miejscu czegoś brakuje, i że trzeba to przewidzieć na podstawie wektora `H_[MASK]`, który 
@@ -317,26 +316,60 @@ wnioskować, że np: po słowie "Natura" często pojawiają się słowa związan
 wskazuje na potrzebę zastosowania czasownika,oraz że czasowniki do 
 niego pasujące to np: rodzi, tworzy.  
 
-Jak model rozumie te podobieństwa i korelacje ? Okazuje się, że kluczowy jest tutaj wektor `H_[MASK]`, który staje 
+Jak model wnioskuje te podobieństwa i korelacje ? Okazuje się, że kluczowy jest tutaj wektor `H_[MASK]`, który staje 
 się dla niego punktem w przestrzeni wielowymiarowej. Głowica MLM następnie odnajduje wśród wszystkich słów w 
-słowniku, te które mają zbliżone reprezentacje wektorowe. Będą to właśnie czaowniki związane ze sztuką i tworzeniem, 
-ponieważ model widział je w podobonych kontekstach miliardy razy.  
+słowniku, te które mają zbliżone reprezentacje wektorowe. Będą to właśnie czaowniki związane ze sztuką i tworzeniem, ponieważ model widział je w podobonych kontekstach miliardy razy.
 
-Stosowanie maskowania przy pomocy losowych tokenów i tokenów niezmienionych pozwala uniknąć problemu zwanego _mask 
-token toxicity_. Polega ona na tym, że model, który w danych uczących stosunkowo często napotyka token _[MASK]_, może uznać go za „szczególnie ważny” i zacząć go nadmiernie używać w swoich odpowiedziach, szczególnie gdy nie jest ich pewny.
+Po zapoznaniu się z kontektem działania głowicy MLM przyjrzyjmy się dokładniej samemu procesowi przewidywania 
+brakującego tokena. 
 
-Aby lepiej wyobrazić sobie konsekwencje tej strategii, rozpatrzmy dwa zdania:
+Przede wszystkim należy podkreślić fakt, że głowica MLM jest dwuwarstwową siecią neuronową. Musi ona wygenerować 
+predykcję dla każdego możliwego tokena w słowniku, aby określić który najlepiej zastąpi maskę.
+Operacja ta jest realizowana przez wymnożenie wektor wag W, i omawianego wcześniej wektora kontekstualizacji 
+zamaskowanego tokena `H_[MASK]`. W rezultacie tworzony jest wektor nazywany **logit** . Każda jego wartość odpowiada 
+jednemu tokenowi w słowniku i określa stopień dopasowania tego tokenu do sąsiedztwa maski. Wartości wektora 
+**logit** mają charakter funkcji ciągłej (przyjmują również wartości ujemne) i nie mają cech prawdopodobieństwa. Aby 
+je otrzymać, wymagana jest dodatkowa normalizacja. Uzyskuje się je przez zastosowanie funkcji **softmax**, która 
+przekształca je do wynikowych predykcji.
 
-``` Natura opona najpiękniejsze obrazy. ```
+Np: 
+Kontynuujmy przykład dla zdania:
 
-``` Opona jest ważną częścią koła samochodowego. ```
+``` Natura [MASK] najpiękniejsze obrazy. ```
 
-W pierwszym przypadku słowo _opona_ jest przykładem tokenu maskującego, który został losowo wybrany ze słownika. Model będzie próbował budować reprezentację kontekstową wszystkich tokenów, uwzględniając słowo _opona_ jako zwyczajny element otoczenia. Model zakoduje informację o tym, że słowo _opona_ znajduje się w otoczeniu _Natura_, _najpiękniejsze_ i _obrazy_. Wewnętrznie model będzie „czuł”, że słowo to wprowadza niespójność i że jest ono mało prawdopodobne w porównaniu do innych sekwencji, z którymi się spotkał, np. _Opona jest ważną częścią koła samochodowego_. Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem będą słabsze, przez co model uczy się, 
+Przykładowy wektor **logit** dla przykładowego 5 elementowego słownika _(„stwarza”, „opona”, „piękny”, „dom”, „las”)
+_ mógłby wyglądać następująco: `[2.5, -1.0, 0.5, -0.2, 1.8]`. 
+
+Po normalizacji funkcją softmax, wektor ten jest zamieniany na faktyczne predykcje:
+`[0.607, 0.018, 0.082, 0.041, 0.301]` .
+
+Z nich z kolei wynika, że najbardziej prawdopodobny token to **stwarza*.
 
 
-Na uwagę zasługuje jeszcze sam sposób wykonywania predykcji. 
+```
+Stosowanie maskowania przy pomocy losowych tokenów i tokenów niezmienionych pozwala uniknąć problemu zwanego 
+"mask token toxicity". 
+Polega ona na tym, że model, który w danych uczących stosunkowo często napotyka token [MASK], 
+może uznać go za „szczególnie ważny” i zacząć go nadmiernie używać w swoich odpowiedziach, szczególnie gdy nie jest ich pewny.
 
-##### Głowica Next Sentence Prediction 
+Przykład konsekwencji tej strategii:
+
+
+* Natura opona najpiękniejsze obrazy.
+
+* Opona jest ważną częścią koła samochodowego.
+
+W pierwszym przypadku słowo "opona" jest przykładem tokenu maskującego, który został losowo wybrany ze słownika.
+Model będzie próbował budować reprezentację kontekstową wszystkich tokenów, uwzględniając słowo "opona" jako zwyczajny element otoczenia. 
+
+Model zakoduje informację o tym, że słowo "opona" znajduje się w otoczeniu "Natura", "najpiękniejsze" i "obrazy". 
+
+Wewnętrznie model będzie "czuł", że słowo to wprowadza niespójność i że jest ono mało prawdopodobne w porównaniu
+do innych sekwencji, z którymi się spotkał, np. "Opona jest ważną częścią koła samochodowego". 
+
+Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem będą słabsze.
+```
+##### Głowica Next Sentence Prediction
 
 
 #### Sposób działania Decodera (w modelu Decoder-Only)
