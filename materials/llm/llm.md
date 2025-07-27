@@ -329,11 +329,11 @@ Operacja ta jest realizowana przez wymnożenie wektor wag W, i omawianego wcześ
 zamaskowanego tokena `H_[MASK]`. W rezultacie tworzony jest wektor nazywany **logit** . Każda jego wartość odpowiada 
 jednemu tokenowi w słowniku i określa stopień dopasowania tego tokenu do sąsiedztwa maski. Wartości wektora 
 **logit** mają charakter funkcji ciągłej (przyjmują również wartości ujemne) i nie mają cech prawdopodobieństwa. Aby 
-je otrzymać, wymagana jest dodatkowa normalizacja. Uzyskuje się je przez zastosowanie funkcji **softmax**, która 
+je otrzymać, wymagana jest dodatkowa normalizacja. Uzyskuje się ją przez zastosowanie funkcji **softmax**, która 
 przekształca je do wynikowych predykcji.
 
 Np: 
-Kontynuujmy przykład dla zdania:
+Kontynuacja przykładu dla zdania:
 
 ``` Natura [MASK] najpiękniejsze obrazy. ```
 
