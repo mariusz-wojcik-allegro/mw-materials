@@ -371,6 +371,9 @@ Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem
 ```
 ##### Głowica Next Sentence Prediction
 
+Głowica **NSP** jest siecią neuronową trenowaną do oceny, czy przedstawione jej sentencje zachowują spójność. Jeśli 
+dwa następujące po sobie zdania są ze sobą powiązane to wynikiem klasyfikacji jest `Prawda`, jeśli natomiast zdania 
+są dobrane losowo, to wynikiem klasyfikacji powinien byc `Fałsz`. 
 
 #### Sposób działania Decodera (w modelu Decoder-Only)
 
