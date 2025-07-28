@@ -10,8 +10,6 @@ Wyróżniamy trzy główne topologie architektury Transformera. Wybór odpowiedn
 
 1. **Encoder Only**
 
-![encoder.jpg](img/encoder.jpg)
-
 Ten typ architektury składa się wyłącznie ze stosu komponentów **Encoder**. Oznacza to, że wiele warstw Encoderów jest ułożonych jedna na drugiej, tworząc złożoną strukturę. Podczas uczenia każdy token ma dostęp do kontekstu wszystkich pozostałych tokenów w sekwencji, co pozwala modelowi lepiej rozumieć znaczenie tekstu.
 
 Modele oparte na tej architekturze osiągają bardzo dobre wyniki w zadaniach związanych z rozumieniem języka naturalnego (**NLU – Natural Language Understanding**), takich jak:
@@ -28,8 +26,6 @@ Warto jednak zaznaczyć, że modele tego typu nie sprawdzają się najlepiej w g
 Najbardziej znanym przedstawicielem tej architektury jest **BERT (Bidirectional Encoder Representations from Transformers)**.
 
 2. **Decoder Only**
-
-![decoder.jpg](img/decoder.jpg)
 
 W tej architekturze występuje wyłącznie stos komponentów **Decoder**, które są ułożone warstwowo.
 
@@ -343,7 +339,7 @@ _ mógłby wyglądać następująco: `[2.5, -1.0, 0.5, -0.2, 1.8]`.
 Po normalizacji funkcją softmax, wektor ten jest zamieniany na faktyczne predykcje:
 `[0.607, 0.018, 0.082, 0.041, 0.301]` .
 
-Z nich z kolei wynika, że najbardziej prawdopodobny token to **stwarza*.
+Z nich z kolei wynika, że najbardziej prawdopodobny token to **stwarza**.
 
 
 ```
