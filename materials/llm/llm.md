@@ -10,7 +10,7 @@ Wyróżniamy trzy główne topologie architektury Transformera. Wybór odpowiedn
 
 1. **Encoder Only**
 
-Ten typ architektury składa się wyłącznie ze stosu komponentów **Encoder**. Oznacza to, że wiele warstw Encoderów jest ułożonych jedna na drugiej, tworząc złożoną strukturę. Podczas uczenia każdy token ma dostęp do kontekstu wszystkich pozostałych tokenów w sekwencji, co pozwala modelowi lepiej rozumieć znaczenie tekstu.
+Ten typ architektury składa się wyłącznie ze stosu komponentów **Encoder**. Oznacza to, że wiele warstw Enkoderów jest ułożonych jedna na drugiej, tworząc złożoną strukturę. Podczas uczenia każdy token ma dostęp do kontekstu wszystkich pozostałych tokenów w sekwencji, co pozwala modelowi lepiej rozumieć znaczenie tekstu.
 
 Modele oparte na tej architekturze osiągają bardzo dobre wyniki w zadaniach związanych z rozumieniem języka naturalnego (**NLU – Natural Language Understanding**), takich jak:
 
@@ -77,12 +77,12 @@ Proces wstępnego uczenia modelu LLM, czyli tzw. pre-training, jest złożony, a
 
 2. Określenie hiperparametrów modelu
 
-- Określenie hiperparametrów definiujących architekturę, np. liczba warstw Encodera, liczba głowic uwagi, wymiar modelu (dmodel).
+- Określenie hiperparametrów definiujących architekturę, np. liczba warstw Enkodera, liczba głowic uwagi, wymiar modelu (dmodel).
 - Hiperparametry definiujące trening, np. liczba sekwencji przetwarzanych równolegle, liczba kroków optymalizacji itp.
 
 3. Faza pretreningowa
 
-- Losowa inicjalizacja wag (Encoder, głowice MLM, tablice embeddings).
+- Losowa inicjalizacja wag (Enkoder, głowice MLM, tablice embeddings).
 
 - Główna pętla treningowa:
 
@@ -179,15 +179,15 @@ Finalny **Input Embedding** jest skonstruowany tak, by słowa o podobnym znaczen
 
 Aby lepiej to zrozumieć, można posłużyć się analogią do smaku potrawy: składa się ona z wielu składników, które są ze sobą wymieszane. Nie rozdzielamy ich w ustach, ale nasz mózg rozpoznaje poszczególne smaki i ich kombinacje. Podobnie Transformer uczy się, że pewne kombinacje wartości w wektorze (wynikające z sumy embeddingu słowa i embeddingu pozycyjnego) sygnalizują, że np. „to jest rzeczownik na początku zdania”, a inne – że „to jest czasownik w środku zdania”.
 
-#### Sposób działania Encodera (w modelu Encoder-Only)
+#### Sposób działania Enkodera (w modelu Encoder-Only)
 
 Jest to ta część architektury Transformera, która odpowiada za uczenie modelu. Składa się z kilku dwuelementowych bloków (warstw). Zwykle jest ich od 6 do 12. Każda warstwa przetwarza dane i przekazuje je do następnej, stopniowo budując coraz bardziej złożone i abstrakcyjne rozumienie wejściowej sekwencji.
 
 ![encoder.jpg](img/encoder.jpg)
 
-##### Jak działa pojedyncza warstwa Encodera?
+##### Jak działa pojedyncza warstwa Enkodera?
 
-Pojedyncza warstwa Encodera składa się z dwóch wyspecjalizowanych podbloków:
+Pojedyncza warstwa Enkodera składa się z dwóch wyspecjalizowanych podbloków:
 
 * Multi-Head Self-Attention (wielogłowicowa uwaga własna),
 * Feed-Forward Network (sieć przekształcająca do przodu).
@@ -233,13 +233,13 @@ Macierz wyjściowa z komponentu **Multi-Head Attention** poddawana jest dalszemu
 1. Połączenie resztkowe (Add): sumuje wejście i wyjście komponentu **Multi-Head Attention**.
 2. Normalizacja warstwowa (Norm): wykonuje normalizację wyniku.
 
-Następnie trafia do kolejnego komponentu w obrębie Encodera – **Feed-Forward Network**.
+Następnie trafia do kolejnego komponentu w obrębie Enkodera – **Feed-Forward Network**.
 
 **Feed-Forward Network**
 
 Jest to komponent uzupełniający wobec **Multi-Head Self-Attention**. Podczas gdy mechanizm uwagi skupia się na relacjach pomiędzy tokenami, **FFN** skupia się na reprezentacji pojedynczego tokena. Architektonicznie jest to dwuwarstwowa sieć neuronowa z nieliniową funkcją aktywacji pomiędzy warstwami. Celem przetwarzania przez ten komponent jest odkrycie subtelnych i złożonych cech z reprezentacji pochodzących z mechanizmu uwagi.
 
-Wynik działania **FFN** poddawany jest operacjom **Add & Norm** i kierowany do kolejnej warstwy Encodera.
+Wynik działania **FFN** poddawany jest operacjom **Add & Norm** i kierowany do kolejnej warstwy Enkodera.
 
 Przetwarzanie w kolejnych warstwach odbywa się w sposób analogiczny do opisanego wyżej. Warto zwrócić uwagę na jeden istotny fakt: wejściem dla pierwszej warstwy jest wektor **Input Embedding**. To on jest podstawą obliczeń w tej warstwie. W przypadku kolejnych encoderów wejściem do warstwy jest wektor wyjściowy z warstwy poprzedniej. Dzięki temu następuje coraz większe doprecyzowanie kontekstu.
 
