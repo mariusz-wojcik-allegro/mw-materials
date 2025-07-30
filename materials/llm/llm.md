@@ -369,7 +369,105 @@ Wartości liczbowe określające związek tego słowa z bezpośrednim otoczeniem
 
 Głowica **NSP** jest siecią neuronową trenowaną do oceny, czy przedstawione jej sentencje zachowują spójność. Jeśli 
 dwa następujące po sobie zdania są ze sobą powiązane to wynikiem klasyfikacji jest `Prawda`, jeśli natomiast zdania 
-są dobrane losowo, to wynikiem klasyfikacji powinien byc `Fałsz`. 
+są dobrane losowo, to wynikiem klasyfikacji powinien byc `Fałsz`. Np:
+
+- Natura stwarza najpiękniejsze obrazy (zdanie A). Bardzo lubię je oglądać (zdanie B). **Wynik: Prawda**
+- Natura stwarza najpiękniejsze obrazy (zdanie A). Opona jest częścią koła (zdanie B). **Wynik: Fałsz**
+
+Trening tego rodzaju głowicy wymaga specjalnie przygotowanych danych uczących. Składa się na niego kilka 
+wykonywanych po sobie kroków: 
+
+- Korzystając z dostępnego korpusu buduje się dwuzdaniowe sekwencje. 
+- W 50% sekwencje składają się ze zdań pasujące do siebie.
+- W 50% sekwencje składają się ze zdań dobranych losowo.
+- Do każdej z sekwencji dodawany jest specjalny token `CLS` będący klasyfikatorem (np. Prawda/Fałsz, lub Pasuje/Nie Pasuje)
+
+Dla tak skonstruowanych sekwencji generowana jest **macierz Embeddings**.
+
+| Token            | ID  | Embedding (4 liczby)       |
+| :--------------- | :-- | :------------------------- |
+| [CLS]            | 1   | [0.10, -0.20, 0.30, -0.40] |
+| Natura           | 201 | [0.12, -0.87, 0.45, 0.33]  |
+| stwarza          | 315 | [-0.56, 0.91, -0.22, 0.77] |
+| najpiękniejsze   | 489 | [0.03, 0.65, -0.44, -0.19] |
+| obrazy           | 522 | [0.88, -0.11, 0.29, -0.73] |
+| .                | 3   | [0.01, 0.02, 0.03, 0.04]   |
+| [SEP]            | 2   | [0.08, 0.07, 0.06, 0.05]   |
+| Bardzo           | 601 | [0.30, 0.10, -0.20, 0.50]  |
+| lubię            | 602 | [0.05, 0.55, 0.10, -0.10]  |
+| je               | 603 | [0.00, 0.00, 0.70, -0.30]  |
+| oglądać          | 604 | [0.40, -0.10, 0.00, 0.20]  |
+| .                | 3   | [0.01, 0.02, 0.03, 0.04]   |
+| [SEP]            | 2   | [0.08, 0.07, 0.06, 0.05]   |
+
+Następnie generowana jest opisywana przeze mnie wcześniej macierz **Positional Embedding**
+
+| Pozycja | Przykładowy Positional Embedding (4 liczby) |
+| :------ | :------------------------------------------ |
+| 0       | [0.01, 0.01, 0.01, 0.01]                    |
+| 1       | [0.02, 0.02, 0.02, 0.02]                    |
+| 2       | [0.03, 0.03, 0.03, 0.03]                    |
+| 3       | [0.04, 0.04, 0.04, 0.04]                    |
+| 4       | [0.05, 0.05, 0.05, 0.05]                    |
+| 5       | [0.06, 0.06, 0.06, 0.06]                    |
+| 6       | [0.07, 0.07, 0.07, 0.07]                    |
+| 7       | [0.08, 0.08, 0.08, 0.08]                    |
+| 8       | [0.09, 0.09, 0.09, 0.09]                    |
+| 9       | [0.10, 0.10, 0.10, 0.10]                    |
+| 10      | [0.11, 0.11, 0.11, 0.11]                    |
+| 11      | [0.12, 0.12, 0.12, 0.12]                    |
+| 12      | [0.13, 0.13, 0.13, 0.13]                    |
+
+Dodatkowo, podczas trenowania modelu do rozwiązywania zadań typu **NSP** występuje jeszcze jedna, niespotykana 
+wcześniej macierz - **Segment Embeddings**. Koduje ona przynależność tokena do sekwencji A lub sekwencji B.
+
+| Token            | Segment ID | Przykładowy Segment Embedding (4 liczby) |
+| :--------------- | :--------- | :--------------------------------------- |
+| [CLS]            | 0 (A)      | [0.77, -0.64, -0.82, 0.5]                |
+| Natura           | 0 (A)      | [0.77, -0.64, -0.82, 0.5]                |
+| stwarza          | 0 (A)      | [0.77, -0.64, -0.82, 0.5]                |
+| najpiękniejsze   | 0 (A)      | [0.77, -0.64, -0.82, 0.5]                |
+| obrazy           | 0 (A)      | [0.77, -0.64, -0.82, 0.5]                |
+| .                | 0 (A)      | [0.77, -0.64, -0.82, 0.5]                |
+| [SEP]            | 0 (A)      | [0.77, -0.64, -0.82, 0.5]                |
+| Bardzo           | 1 (B)      | [-0.42, -0.88, 0.94, -0.28]              |
+| lubię            | 1 (B)      | [-0.42, -0.88, 0.94, -0.28]              |
+| je               | 1 (B)      | [-0.42, -0.88, 0.94, -0.28]              |
+| oglądać          | 1 (B)      | [-0.42, -0.88, 0.94, -0.28]              |
+| .                | 1 (B)      | [-0.42, -0.88, 0.94, -0.28]              |
+| [SEP]            | 1 (B)      | [-0.42, -0.88, 0.94, -0.28]              |
+
+Te trzy tabele określają:
+1. znaczenie słów w sekwencji(Input Embeddings)
+2. pozycję słów w sekwencji (Positional Embeddings)
+3. przynależność słowa do badanych zdań składowych (Segment Embeddings)
+
+Złożenie tych cech pozwala określić macierz **Final Input Embeddings**, która stanowi wejście do warstwy enkoderów. 
+Powstaje ona przez zsumowanie wektorów dla poszczególnych tokenów. Np: 
+
+Dla tokena `Natura` rachunek ten będzie wyglądał następująco:
+
+`[0.91, -1.49, -0.35, 0.85]` (Final Input Embedding) = `[0.12, -0.87, 0.45, 0.33]` (Input Embedding) + `[0.02, 0.02, 0.02, 0.02]` (Positional Embedding) +` [0.77, -0.64, -0.82, 0.50]` (Segment Embedding)
+
+| Pozycja | Token            | Final Input Embedding (4 liczby) |
+| :------ | :--------------- | :------------------------------- |
+| 0       | [CLS]            | [0.88, -0.83, -0.51, 0.11]       |
+| 1       | Natura           | [0.91, -1.49, -0.35, 0.85]       |
+| 2       | stwarza          | [0.24, 0.3, -1.01, 1.3]          |
+| 3       | najpiękniejsze   | [0.84, 0.05, -1.22, 0.35]        |
+| 4       | obrazy           | [1.7, -0.7, -0.48, -0.18]        |
+| 5       | .                | [0.84, -0.56, -0.73, 0.6]        |
+| 6       | [SEP]            | [0.92, -0.5, -0.69, 0.62]        |
+| 7       | Bardzo           | [-0.04, -0.7, 0.82, 0.3]         |
+| 8       | lubię            | [-0.28, -0.24, 1.13, -0.29]      |
+| 9       | je               | [-0.32, -0.78, 1.74, -0.48]      |
+| 10      | oglądać          | [0.09, -0.87, 1.05, 0.03]        |
+| 11      | .                | [-0.29, -0.74, 1.09, -0.12]      |
+| 12      | [SEP]            | [-0.21, -0.68, 1.13, -0.1]       |
+
+
+
+
 
 #### Sposób działania Decodera (w modelu Decoder-Only)
 
