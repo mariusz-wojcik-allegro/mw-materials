@@ -189,8 +189,8 @@ Jest to ta część architektury Transformera, która odpowiada za uczenie model
 
 Pojedyncza warstwa Enkodera składa się z dwóch wyspecjalizowanych podbloków:
 
-* Multi-Head Self-Attention (wielogłowicowa uwaga własna),
-* Feed-Forward Network (sieć przekształcająca do przodu).
+* Multi-Head Self-Attention,
+* Feed-Forward Network.
 
 **Multi-Head Self-Attention**
 
@@ -253,7 +253,9 @@ konkretnego wystąpienia tokena (czyli w tej danej sekwencji i sytuacji). Jest t
 
 Macierz ta nie jest jeszcze ostatecznym efektem procesu pretrenowania. Stanowi ona punkt wyjścia do kolejnego etapu 
 treningu – realizacji zadań pretreningowych. Są 
-one wykonywane przez specjalne komponenty zwane **głowicami predykcyjnymi (prediction heads)**. Ich zadaniem jest przekształcenie kontekstualizowanej macierzy reprezentacji, stworzonej przez Enkoder, w konkretne predykcje. Następnie te przewidywania są porównywane z danymi wzorcowymi, co pozwala obliczyć funkcję straty – miarę poprawności działania modelu. Na tej podstawie aktualizowane są wagi sieci, co prowadzi do stopniowego doskonalenia modelu.
+one wykonywane przez specjalne komponenty zwane **głowicami predykcyjnymi (prediction heads)**. Ich zadaniem jest 
+przekształcenie kontekstualizowanej macierzy reprezentacji, stworzonej przez enkoder, w konkretne predykcje. 
+Następnie te przewidywania są porównywane z danymi wzorcowymi, co pozwala obliczyć funkcję straty – miarę poprawności działania modelu. Na tej podstawie aktualizowane są wagi sieci, co prowadzi do stopniowego doskonalenia modelu.
 
 W przypadku architektury **Encoder-Only** najczęściej stosuje się dwa rodzaje głowic predykcyjnych:
 
@@ -443,7 +445,7 @@ Te trzy tabele określają:
 3. przynależność słowa do badanych zdań składowych (Segment Embeddings)
 
 Złożenie tych cech pozwala określić macierz **Final Input Embeddings**, która stanowi wejście do warstwy enkoderów. 
-Powstaje ona przez zsumowanie wektorów dla poszczególnych tokenów. Np: 
+Powstaje ona przez zsumowanie wszystkich trzech wektorów dla poszczególnych tokenów. Np: 
 
 Dla tokena `Natura` rachunek ten będzie wyglądał następująco:
 
@@ -464,6 +466,12 @@ Dla tokena `Natura` rachunek ten będzie wyglądał następująco:
 | 10      | oglądać          | [0.09, -0.87, 1.05, 0.03]        |
 | 11      | .                | [-0.29, -0.74, 1.09, -0.12]      |
 | 12      | [SEP]            | [-0.21, -0.68, 1.13, -0.1]       |
+
+Tak przygotowana macierz **Final Input Embeddings** przekazywana jest do pierwszego enkodera. Od tego momentu 
+przetwarzanie odbywa się według opisywanego wcześniej schematu. Kolejne warstwy enkoderów wypracowują ostateczną postać 
+macierzy kontekstualizacji, która zostanie wykorzystana do realizacji zadania pretreningowego  - **NSP - Next 
+Sentence Prediction**.   
+
 
 
 
